@@ -1,0 +1,40 @@
+$defaultTransitionEasing: cubic-bezier(0.785, 0.135, 0.15, 0.86); //  easeInOutCirc
+
+@keyframes colorloop{
+	0%		{color:#26FA9A} //green
+	25%		{color:#FCEE67} //yellow
+	50%		{color:#FF4081} //red
+	75%		{color:#18FFFF} //blue
+	100%	{color:#26FA9A} //green
+}
+@keyframes colorloop--bg{
+	0%		{background-color:#26FA9A} //green
+	25%		{background-color:#FCEE67} //yellow
+	50%		{background-color:#FF4081} //red
+	75%		{background-color:#18FFFF} //blue
+	100%	{background-color:#26FA9A} //green
+}
+
+@keyframes colorloop--bg-gradient {
+	0%		{background-image: linear-gradient(transparent calc(100% - 0.125em), #26FA9A 0.125em)} //green
+	25%		{background-image: linear-gradient(transparent calc(100% - 0.125em), #FCEE67 0.125em)} //yellow
+	50%		{background-image: linear-gradient(transparent calc(100% - 0.125em), #FF4081 0.125em)} //red
+	75%		{background-image: linear-gradient(transparent calc(100% - 0.125em), #18FFFF 0.125em)} //blue
+	100%	{background-image: linear-gradient(transparent calc(100% - 0.125em), #26FA9A 0.125em)} //green
+}
+
+@keyframes colorloop--border{
+	0%		{border: 1px solid #26FA9A} //green
+	25%		{border: 1px solid #FCEE67} //yellow
+	50%		{border: 1px solid #FF4081} //red
+	75%		{border: 1px solid #18FFFF} //blue
+	100%	{border: 1px solid #26FA9A} //green
+}
+
+@keyframes colorloop--border-color{
+	0%		{border-color:#26FA9A} //green
+	25%		{border-color:#FCEE67} //yellow
+	50%		{border-color:#FF4081} //red
+	75%		{border-color:#18FFFF} //blue
+	100%	{border-color:#26FA9A} //green
+}

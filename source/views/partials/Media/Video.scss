@@ -1,0 +1,183 @@
+/*** VIDEO CONTROLS CSS ***/
+/* control holder */
+
+.Video {
+	&__controls{
+		color:#ccc;
+		position:absolute;
+		bottom:0;
+		width:100%;
+		display: table;
+		z-index:5;
+		padding: 5px 10px;
+		opacity: 0;
+		visibility: hidden;
+		transition: all 0.3s ease;
+		&.show{
+			opacity: 1;
+			visibility: visible;
+		}
+		&:after{
+			content: '';
+		width: 100%;
+			height: 80px;
+		background-image: linear-gradient(transparent, rgba(0, 0, 0, 0.5));
+			position: absolute;
+		left: 0;
+		bottom: 0;
+			z-index: -1;
+			pointer-events: none;
+	  }
+	}
+}
+
+
+.bigPlay {
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	transform: translate(-50%,-50%);
+	z-index: 3;
+	width: 5em;
+	height: 5em;
+	opacity: 0;
+	visibility: hidden;
+	transition: all 0.3s ease;
+	&.show{
+		opacity: 1;
+		visibility: visible;
+	}
+	svg{
+		width: 100%;
+		height: 100%;
+		fill: $primary;
+	}
+}
+
+.btnPlay, .sound, .btnFS {
+  width: 30px;
+  height: 30px;
+	cursor:pointer;
+  position: relative;
+	display: table-cell;
+	vertical-align: middle;
+}
+.icon-play{
+	background:url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADgAAAAMCAYAAAA3bX6lAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNSBNYWNpbnRvc2giIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6NzQzNEZBNTY1MDQzMTFFMkI4ODNBMURBREZGNzc4Q0YiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6NzQzNEZBNTc1MDQzMTFFMkI4ODNBMURBREZGNzc4Q0YiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo3NDM0RkE1NDUwNDMxMUUyQjg4M0ExREFERkY3NzhDRiIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo3NDM0RkE1NTUwNDMxMUUyQjg4M0ExREFERkY3NzhDRiIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PosqxrYAAAGhSURBVHja3NW/S0JRFMDxaxIULUFLOEQgBOKSFEERQovUlpMN0hoRBC1BU9DUEv0Ym1yEkqCgoaXAEBqCfkBDLQUhSP+AUDTY99mRbperXi0XD3z0vvvefecdrx5VqVQqaJ4QgcKWMV+Z65FxI0JNrPmXHMooMK6dDCJvFOi9XyHsmNT7MDbw6nBtRnJl6sw1lMMsMItedGk3Nwv0jl+QrPPAMdxq99DPXWDKmCtYri1UWe+So8zHy7pS6gg7COMRHxjGG3axIsd5+NVPHGMVRTkuqOoRQAbLCGEbazizrA04ztly/ApfeRu/o08eYBqfyGJOihzBTZWbn2PeMfkCZjCLKDYx0coCO7RxUXTLsV8KVVKcLbwdXFTucYiIjK8xqFocXoFpxJDDqOzcJYI4xTj2jXXv8tVc0r6eLpHAnYzH8NzqAs0f8j0GpNE8WJqMN85hyKErxrWmVGkAKfRjUnLF/thkbDlqdlG9syWMAjux1+D/oFdM2pL8ANF/6KK1clgLTGknTyw72KykwzWVh0zXmWsoh95F2zLavsAvAQYAqyaEyv7XYdsAAAAASUVORK5CYII=') no-repeat -11px 0;
+	width: 6px;
+	height: 9px;
+	display: block;
+	margin: 0 auto;
+}
+.icon-pause{
+	background:url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADgAAAAMCAYAAAA3bX6lAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNSBNYWNpbnRvc2giIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6NzQzNEZBNTY1MDQzMTFFMkI4ODNBMURBREZGNzc4Q0YiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6NzQzNEZBNTc1MDQzMTFFMkI4ODNBMURBREZGNzc4Q0YiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo3NDM0RkE1NDUwNDMxMUUyQjg4M0ExREFERkY3NzhDRiIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo3NDM0RkE1NTUwNDMxMUUyQjg4M0ExREFERkY3NzhDRiIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PosqxrYAAAGhSURBVHja3NW/S0JRFMDxaxIULUFLOEQgBOKSFEERQovUlpMN0hoRBC1BU9DUEv0Ym1yEkqCgoaXAEBqCfkBDLQUhSP+AUDTY99mRbperXi0XD3z0vvvefecdrx5VqVQqaJ4QgcKWMV+Z65FxI0JNrPmXHMooMK6dDCJvFOi9XyHsmNT7MDbw6nBtRnJl6sw1lMMsMItedGk3Nwv0jl+QrPPAMdxq99DPXWDKmCtYri1UWe+So8zHy7pS6gg7COMRHxjGG3axIsd5+NVPHGMVRTkuqOoRQAbLCGEbazizrA04ztly/ApfeRu/o08eYBqfyGJOihzBTZWbn2PeMfkCZjCLKDYx0coCO7RxUXTLsV8KVVKcLbwdXFTucYiIjK8xqFocXoFpxJDDqOzcJYI4xTj2jXXv8tVc0r6eLpHAnYzH8NzqAs0f8j0GpNE8WJqMN85hyKErxrWmVGkAKfRjUnLF/thkbDlqdlG9syWMAjux1+D/oFdM2pL8ANF/6KK1clgLTGknTyw72KykwzWVh0zXmWsoh95F2zLavsAvAQYAqyaEyv7XYdsAAAAASUVORK5CYII=') no-repeat -34px -1px;
+	width: 8px;
+	height: 9px;
+	display: block;
+	margin: 0 auto;
+}
+.selected{
+	font-size:15px;
+	color:#ccc;
+}
+.icon-sound {
+	background:url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADgAAAAMCAYAAAA3bX6lAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNSBNYWNpbnRvc2giIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6NzQzNEZBNTY1MDQzMTFFMkI4ODNBMURBREZGNzc4Q0YiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6NzQzNEZBNTc1MDQzMTFFMkI4ODNBMURBREZGNzc4Q0YiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo3NDM0RkE1NDUwNDMxMUUyQjg4M0ExREFERkY3NzhDRiIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo3NDM0RkE1NTUwNDMxMUUyQjg4M0ExREFERkY3NzhDRiIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PosqxrYAAAGhSURBVHja3NW/S0JRFMDxaxIULUFLOEQgBOKSFEERQovUlpMN0hoRBC1BU9DUEv0Ym1yEkqCgoaXAEBqCfkBDLQUhSP+AUDTY99mRbperXi0XD3z0vvvefecdrx5VqVQqaJ4QgcKWMV+Z65FxI0JNrPmXHMooMK6dDCJvFOi9XyHsmNT7MDbw6nBtRnJl6sw1lMMsMItedGk3Nwv0jl+QrPPAMdxq99DPXWDKmCtYri1UWe+So8zHy7pS6gg7COMRHxjGG3axIsd5+NVPHGMVRTkuqOoRQAbLCGEbazizrA04ztly/ApfeRu/o08eYBqfyGJOihzBTZWbn2PeMfkCZjCLKDYx0coCO7RxUXTLsV8KVVKcLbwdXFTucYiIjK8xqFocXoFpxJDDqOzcJYI4xTj2jXXv8tVc0r6eLpHAnYzH8NzqAs0f8j0GpNE8WJqMN85hyKErxrWmVGkAKfRjUnLF/thkbDlqdlG9syWMAjux1+D/oFdM2pL8ANF/6KK1clgLTGknTyw72KykwzWVh0zXmWsoh95F2zLavsAvAQYAqyaEyv7XYdsAAAAASUVORK5CYII=') no-repeat -19px 0;
+	width: 13px;
+	height: 10px;
+	display: block;
+	pointer-events: none;
+	margin: 0 auto;
+}
+.muted .icon-sound{
+	width: 7px !important;
+	pointer-events: none;
+}
+
+.icon-fullscreen {
+	background:url('data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAADgAAAAMCAYAAAA3bX6lAAAAGXRFWHRTb2Z0d2FyZQBBZG9iZSBJbWFnZVJlYWR5ccllPAAAAyJpVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADw/eHBhY2tldCBiZWdpbj0i77u/IiBpZD0iVzVNME1wQ2VoaUh6cmVTek5UY3prYzlkIj8+IDx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IkFkb2JlIFhNUCBDb3JlIDUuMC1jMDYwIDYxLjEzNDc3NywgMjAxMC8wMi8xMi0xNzozMjowMCAgICAgICAgIj4gPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4gPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIgeG1sbnM6eG1wPSJodHRwOi8vbnMuYWRvYmUuY29tL3hhcC8xLjAvIiB4bWxuczp4bXBNTT0iaHR0cDovL25zLmFkb2JlLmNvbS94YXAvMS4wL21tLyIgeG1sbnM6c3RSZWY9Imh0dHA6Ly9ucy5hZG9iZS5jb20veGFwLzEuMC9zVHlwZS9SZXNvdXJjZVJlZiMiIHhtcDpDcmVhdG9yVG9vbD0iQWRvYmUgUGhvdG9zaG9wIENTNSBNYWNpbnRvc2giIHhtcE1NOkluc3RhbmNlSUQ9InhtcC5paWQ6NzQzNEZBNTY1MDQzMTFFMkI4ODNBMURBREZGNzc4Q0YiIHhtcE1NOkRvY3VtZW50SUQ9InhtcC5kaWQ6NzQzNEZBNTc1MDQzMTFFMkI4ODNBMURBREZGNzc4Q0YiPiA8eG1wTU06RGVyaXZlZEZyb20gc3RSZWY6aW5zdGFuY2VJRD0ieG1wLmlpZDo3NDM0RkE1NDUwNDMxMUUyQjg4M0ExREFERkY3NzhDRiIgc3RSZWY6ZG9jdW1lbnRJRD0ieG1wLmRpZDo3NDM0RkE1NTUwNDMxMUUyQjg4M0ExREFERkY3NzhDRiIvPiA8L3JkZjpEZXNjcmlwdGlvbj4gPC9yZGY6UkRGPiA8L3g6eG1wbWV0YT4gPD94cGFja2V0IGVuZD0iciI/PosqxrYAAAGhSURBVHja3NW/S0JRFMDxaxIULUFLOEQgBOKSFEERQovUlpMN0hoRBC1BU9DUEv0Ym1yEkqCgoaXAEBqCfkBDLQUhSP+AUDTY99mRbperXi0XD3z0vvvefecdrx5VqVQqaJ4QgcKWMV+Z65FxI0JNrPmXHMooMK6dDCJvFOi9XyHsmNT7MDbw6nBtRnJl6sw1lMMsMItedGk3Nwv0jl+QrPPAMdxq99DPXWDKmCtYri1UWe+So8zHy7pS6gg7COMRHxjGG3axIsd5+NVPHGMVRTkuqOoRQAbLCGEbazizrA04ztly/ApfeRu/o08eYBqfyGJOihzBTZWbn2PeMfkCZjCLKDYx0coCO7RxUXTLsV8KVVKcLbwdXFTucYiIjK8xqFocXoFpxJDDqOzcJYI4xTj2jXXv8tVc0r6eLpHAnYzH8NzqAs0f8j0GpNE8WJqMN85hyKErxrWmVGkAKfRjUnLF/thkbDlqdlG9syWMAjux1+D/oFdM2pL8ANF/6KK1clgLTGknTyw72KykwzWVh0zXmWsoh95F2zLavsAvAQYAqyaEyv7XYdsAAAAASUVORK5CYII=') no-repeat 0 0;
+	width: 10px;
+	height: 10px;
+	display: block;
+	pointer-events: none;
+	margin: 0 auto;
+}
+
+/* PROGRESS BAR CSS */
+/* Progress bar */
+.progress-bar {
+	display: inline-block;
+	padding: 12.5px;
+	vertical-align: top;
+	cursor:pointer;
+	width: 100%;
+}
+.progress {
+	height:5px;
+	position:relative;
+	background: rgba(0,0,0,0.4); /* fallback */
+	pointer-events: none;
+}
+.progress span {
+	height:100%;
+	position:absolute;
+	top:0;
+	left:0;
+	display:block;
+}
+.timeBar{
+	z-index:10;
+	width:0;
+	background: #3594e8;
+	pointer-events: none;
+}
+.bufferBar{
+	z-index:5;
+	width:0;
+	background: rgba(255,255,255,0.2);
+	pointer-events: none;
+}
+/* not ready yet */
+.yt__playbtn{
+	display: block;
+  position: absolute;
+  z-index: 1;
+  top: 50%;
+  left: 50%;
+  transform: translate3d(-50%, -50%,0);
+  -webkit-transform: translate3d(-50%, -50%,0);
+	background: white;
+	color: black;
+  // padding: 10px;
+  background: none;
+  border: 2px solid currentColor;
+  // border-radius: 100%;
+  box-shadow: 0 1px 1px rgba(0, 0, 0, 0.15);
+  color: #fff;
+  transition: all .3s ease;
+	cursor: pointer;
+}
+
+
+/* This used to work for the parent element of button divs */
+/* But it does not work with newer browsers, the below doesn't hide the play button parent div */
+
+*::-webkit-media-controls-panel {
+  display: none!important;
+  -webkit-appearance: none;
+}
+
+/* Old shadow dom for play button */
+
+*::-webkit-media-controls-play-button {
+  display: none!important;
+  -webkit-appearance: none;
+}
+
+/* New shadow dom for play button */
+
+/* This one works! */
+
+*::-webkit-media-controls-start-playback-button {
+  display: none!important;
+  -webkit-appearance: none;
+}

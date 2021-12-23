@@ -1,0 +1,9 @@
+{% extends "_layout.twig" %}
+
+{% block content %}
+    <section class="404">
+        <div class="container">
+            {% include 'partials/no-content.twig' with {variant: '404'}%}
+        </div>
+    </section>
+{% endblock %}

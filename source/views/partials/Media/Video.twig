@@ -1,0 +1,14 @@
+<div class="Video">
+    <video data-object-fit="cover" poster="{{function('wp_get_environment_type') != 'local' ? 'https://ayxgj9k9n.cloudimg.io/width/768/x/' : ''}}{{post.meta('fullimage')}}" preload playsinline="" crossorigin="">
+        <source src="{{post.meta('video')}}" type="video/mp4">
+    </video>
+    {% include 'partials/Button/PlayButton.twig' %}
+    <div class="Video__controls">
+        <div title="Play/Pause video" class="btnPlay"><span class="icon-play"></span></div>
+        <div class="progress-bar">
+            <div class="progress"><span class="bufferBar"></span><span class="timeBar"></span></div>
+        </div>
+        <div title="Mute/Unmute sound" class="sound"><span class="icon-sound"></span></div>
+        <div title="Switch to full screen" class="btnFS"><span class="icon-fullscreen"></span></div>
+    </div>
+</div>

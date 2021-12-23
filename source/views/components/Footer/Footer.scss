@@ -1,0 +1,27 @@
+.site-footer{
+	background: var(--bg-color-secondary);
+	padding: 3rem 0;
+	// margin-top: 5rem;
+	color: var(--text-color);
+	.footer__links {
+		display: flex;
+		justify-content: space-between;
+		align-items: center;
+		margin-bottom: 0.5rem;
+		a {
+			white-space: pre;
+		}
+	}
+	.footer__copyright {
+		text-align: right;
+		@include media-breakpoint-down(sm) { 
+			text-align: center;
+			opacity: 0.8;
+			font-size: 0.85rem;
+			margin-top: 2rem;
+		}
+		a {
+			text-decoration: underline;
+		}
+	}
+}

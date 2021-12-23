@@ -1,0 +1,79 @@
+/*Preloader*/
+
+.preloader {
+	position: absolute;
+	top: 17rem;
+	left: 0;
+	right: 0;
+  margin: 0 auto;
+  width: 64px;
+  height: 64px;
+  display: block;
+  -webkit-animation: spin 2s linear infinite;
+          animation: spin 2s linear infinite;
+}
+
+.preloader svg circle {
+  stroke-width: 4px;
+  color: var(--text-color);
+  stroke-dasharray: 100;
+  stroke-dashoffset: 0;
+  -webkit-animation: dash 1.5s ease-in-out infinite;
+          animation: dash 1.5s ease-in-out infinite;
+}
+@supports (-ms-ime-align: auto) {
+  .preloader svg circle {
+    -webkit-animation: none;
+            animation: none;
+  }
+}
+
+@-webkit-keyframes spin {
+  from {
+    -webkit-transform: rotate3d(1,1,1,0deg);
+            transform: rotate3d(1,1,1,0deg);
+  }
+  to {
+    -webkit-transform: rotate3d(1,1,1,360deg);
+            transform: rotate3d(1,1,1,360deg);
+  }
+}
+
+@keyframes spin {
+  from {
+    -webkit-transform: rotate(1,1,1,0deg);
+            transform: rotate(1,1,1,0deg);
+  }
+  to {
+    -webkit-transform: rotate(1,1,1,360deg);
+            transform: rotate(1,1,1,360deg);
+  }
+}
+@-webkit-keyframes dash {
+  0% {
+    stroke-dasharray: 1, 200;
+    stroke-dashoffset: 0;
+  }
+  50% {
+    stroke-dasharray: 89, 200;
+    stroke-dashoffset: -35;
+  }
+  100% {
+    stroke-dasharray: 89, 200;
+    stroke-dashoffset: -124;
+  }
+}
+@keyframes dash {
+  0% {
+    stroke-dasharray: 1, 200;
+    stroke-dashoffset: 0;
+  }
+  50% {
+    stroke-dasharray: 89, 200;
+    stroke-dashoffset: -35;
+  }
+  100% {
+    stroke-dasharray: 89, 200;
+    stroke-dashoffset: -124;
+  }
+}

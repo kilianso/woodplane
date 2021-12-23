@@ -1,0 +1,27 @@
+:root {
+    --bg-color:             #ffffff;
+    --bg-color-secondary:   #f6f9fc;
+    --bg-color-tertiary:    #ededed;
+    --bg-color-cards:       #ffffff;
+    --text-color:           #00101f;
+    --text-color-secondary: #00182f;
+    --text-color-tertiary:  #192e43;
+  }
+  
+  [data-theme="dark"] {
+    --bg-color:             #00101f;
+    --bg-color-secondary:   #00182f;
+    --bg-color-tertiary:    #192e43;
+    --bg-color-cards:       #00182f;
+    --text-color:           #ffffff;
+    --text-color-secondary: #f6f9fc;
+    --text-color-tertiary:  #ededed;
+  }
+
+  main {
+    padding: 4rem 0;
+  }
+
+  video, img, figure {
+    max-width: 100%;
+  }

@@ -1,0 +1,43 @@
+<!doctype html>
+<html {{ site.language_attributes }}>
+    <head>
+        <meta charset="{{ site.charset }}" />
+        {% if post.title or title%}
+            <title>{{post.title ?: title}} – {{site.title}}</title>
+            <meta property="og:title" content="{{post.title ?: title}} – {{site.title}}">
+        {% else %}
+            <title>{{site.title}}</title>        
+            <meta property="og:title" content="{{site.title}}">
+        {% endif %}
+        <meta name="description" content="{{description ?: site.description}}">
+        <link rel="stylesheet" href="{{ site.theme.link }}/style.css" type="text/css" media="screen" />
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+        <link rel="pingback" href="{{ site.pingback_url }}" />
+       
+        <!-- <script async>
+            //determines if the user has a set theme
+            function detectColorScheme(){
+                var theme="light";    //default to light
+
+                //local storage is used to override OS theme settings
+                if(localStorage.getItem("theme")){
+                    if(localStorage.getItem("theme") == "dark"){
+                        var theme = "dark";
+                    }
+                } else if(!window.matchMedia) {
+                    //matchMedia method not supported
+                    return false;
+                } else if(window.matchMedia("(prefers-color-scheme: dark)").matches) {
+                    //OS theme setting detected as dark
+                    var theme = "dark";
+                }
+
+                //dark theme preferred, set document with a `data-theme` attribute
+                if (theme=="dark") {
+                    document.documentElement.setAttribute("data-theme", "dark");
+                }
+            }
+            detectColorScheme();
+        </script> -->
+
+        {{ function('wp_head') }}

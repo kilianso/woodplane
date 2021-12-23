@@ -1,0 +1,11 @@
+{% set cloudImgUrl = 'https://ayxgj9k9n.cloudimg.io/' %}
+{% set imageURL = post.meta('fullimage') ? post.meta('fullimage') : post.thumbnail.src %}
+
+<img class="lazy" 
+    data-object-fit="cover" 
+    alt="{{post.title}}" 
+    src="{{function('wp_get_environment_type') != 'local' ? cloudImgUrl~'width/5/x/' : ''}}{{imageURL}}"
+    data-src="{{function('wp_get_environment_type') != 'local' ? cloudImgUrl~'width/768/x/' : ''}}{{imageURL}}" 
+    data-srcset="{{function('wp_get_environment_type') != 'local' ? cloudImgUrl~'width/768/x/' : ''}}{{imageURL}} 768w, {{function('wp_get_environment_type') != 'local' ? cloudImgUrl~'width/660/x/' : ''}}{{imageURL}} 660w"
+    sizes="(max-width: 660px) 660px, 768px"
+    >

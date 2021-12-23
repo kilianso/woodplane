@@ -1,0 +1,16 @@
+{% extends "_layout.twig" %}
+
+{% block content %}
+    <section class="content">
+        <div class="container is-narrow">
+            <article>
+                <header class="article__header">
+                    <h1>{{post.title}}</h1>
+                </header>
+                <div class="article__content">
+                    {{post.content}}
+                </div>
+            </article>
+        </div>
+    </section>
+{% endblock %}

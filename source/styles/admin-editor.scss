@@ -1,0 +1,11 @@
+@charset 'UTF-8';
+
+// context
+$context: 'edit';
+
+// tools
+@import 'tools/context';
+
+@include context-edit {
+    // edit code
+}

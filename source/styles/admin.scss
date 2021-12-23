@@ -1,0 +1,11 @@
+@charset 'UTF-8';
+
+// context
+$context: 'admin';
+
+// tools
+@import 'tools/context';
+
+// @include context-admin {
+//     // admin code
+// }

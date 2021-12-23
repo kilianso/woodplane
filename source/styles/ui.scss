@@ -1,0 +1,25 @@
+@charset 'UTF-8';
+
+// context
+$context: 'view';
+
+//Don't change the order here! Variables are shared across files.
+
+//Vendor stuff
+@import "../node_modules/bootstrap/scss/bootstrap";
+
+// base
+@import 'base/general';
+@import 'base/animation';
+@import 'base/fontimport';
+
+
+// components
+@import 'components/preloader';
+
+// templates
+@import 'templates/archive';
+
+// Twig component styles
+@import '../views/partials/**/*.scss';
+@import '../views/components/**/*.scss';

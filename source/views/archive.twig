@@ -1,0 +1,56 @@
+{% extends "_layout.twig" %}
+
+{% set showAllLink = term ? (term.children ? term.link : (parent.ID ? parent.link : site.url~'/'~posttype~'/')) : site.url~'/'~posttype~'/' %}
+{% set currentUrlWithoutParams = function('get_current_url')|split('?')[0] %}
+
+{% block content %}
+    <section class="archive">
+        <div class="container">
+            <div class="row">
+                <div class="{{topLevelCats|length ? 'col-md-5' : 'col-12'}} margin-bottom--small">
+                    <h1 class="page-title">{{title}}</h1>
+                    {% if description %}
+                        <div class="page-description">{{description}}</div>
+                    {% endif %}
+                </div>
+                {% if topLevelCats|length %}
+                    <div class="col-md-7">
+                        <nav class="filter is-mobile" role="navigation">
+                            <ul id="filter__list">
+                                <li class="filter__item {{showAllLink == currentUrlWithoutParams ? 'active' : null}}">
+                                    <a href="{{showAllLink}}">Show all</a>
+                                </li>
+                                {% if term.children %}
+                                        {% for subcategory in term.children %}
+                                            <li class="filter__item {{subcategory.link == currentUrlWithoutParams ? 'active' : null}}"><a href="{{subcategory.link}}">{{subcategory.name}}</a></li>
+                                        {% endfor %}
+                                {% elseif parent.ID %}
+                                    {% for category in parent.children %}
+                                        <li class="filter__item {{category.link == currentUrlWithoutParams ? 'active' : null}}"><a href="{{category.link}}">{{category.name}}</a></li>
+                                    {% endfor %}
+                                {% else %}
+                                    {% for category in topLevelCats %}
+                                        <li class="filter__item {{category.link == currentUrlWithoutParams ? 'active' : null}}"><a href="{{category.link}}">{{category.name}}</a></li>
+                                    {% endfor %}
+                                {% endif %}
+                                <li class="filter__item more hidden" data-width="80"><a href="#">More</a><ul></ul></li>
+                            </ul>
+                        </nav>
+                    </div>
+                {% endif %}
+                {% if posts|length %}
+                    <div class="cards">
+                        {% for post in posts %}
+                            <li>{{post.title}}</li>
+                        {% endfor %}
+                    </div>
+                {% else %}
+                    {% include 'partials/no-content.twig' %}
+                {% endif %}
+                <div class="col-12 text-center margin--big">
+                    {{ function('next_posts_link', 'Show more', 0 ) }}
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}

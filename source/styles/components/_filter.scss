@@ -1,0 +1,147 @@
+.page-header--filter {
+  display: flex;
+  flex-direction: column;
+  @media screen and (min-width: 767px) {
+    align-items: flex-end;
+    flex-direction: row;
+  }
+}
+
+.filter-wrapper {
+  z-index: 5;
+}
+.filter {
+    margin: 0 -15px;
+    &.is-mobile {
+      transform: translateZ(0);
+      overflow-x: scroll;
+      scrollbar-width: none;
+      font-size: 0;    
+      -ms-overflow-style: none;
+      -webkit-overflow-scrolling: touch;
+      //background: rgba(0,0,0,0.025);
+    }
+    > #filter__list {
+      display: flex;
+      list-style-type: none;
+      margin: 0;
+      padding: 10px 0;
+      font-size: 0;    
+      text-align: left;
+      white-space: nowrap;
+      @media screen and (min-width: 768px) {
+        justify-content: flex-end;
+      }
+      .is-mobile & {
+        display: inline-block;
+        margin: 0 -15px;
+      }
+      > .filter__item {
+        &.hidden {
+          display: none;
+        }
+        display: inline-block;
+        position: relative;
+        a {
+          font-size: 1rem;
+          display: block;
+          text-align: center;
+          text-decoration: none;
+          padding: 1rem 0;
+          margin: 0 15px;
+          color: var(--text-color);
+          + ul {
+            display: none;
+            position: absolute;
+            top: 100%;
+            right: 0;
+            margin-right: 0;
+            padding: 0;
+            box-shadow: 0 3px 60px rgba(0,0,0,.08);
+            background: var(--bg-color-secondary);
+            li {
+              a {
+                padding: 1rem 2rem;
+                margin: 0;
+                text-align: left;
+                white-space: nowrap;
+                border-bottom: 2px solid rgba(0,0,0,0.066);
+              }
+              @media (hover: hover) {
+                a:hover {
+                  border-bottom: 2px solid;
+                  // @extend .has-colorloop--border-color;
+                  border-color: $accent-color;
+                }
+              }
+            }
+          }
+        }
+        &.more {
+          z-index: 1;
+          > a:after {
+            content: '';
+            display: inline-block;
+            background-size: contain;
+            background-repeat: no-repeat;
+            background-image:url("data:image/svg+xml;base64,PHN2ZyBmaWxsPSIjMDAxODJmIiB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCI+PHBhdGggZD0iTTYgMTJhMyAzIDAgMSAxLTYgMCAzIDMgMCAwIDEgNiAwem05IDBhMyAzIDAgMSAxLTYgMCAzIDMgMCAwIDEgNiAwem05IDBhMyAzIDAgMSAxLTYgMCAzIDMgMCAwIDEgNiAweiIvPjwvc3ZnPg==");
+            width: 1em;
+            height: 1em;
+            cursor: pointer;
+            vertical-align: middle;
+            margin: 0 .5em;
+            opacity: 0.75;
+            @media (prefers-color-scheme: dark) {
+              filter: invert(1);
+            }
+          }
+        }
+        @media (hover: hover) {
+          &:hover {
+            &:not(.more){
+              > a {
+                position: relative;
+                &:after {
+                  content: '';
+                  position: absolute;
+                  left: 0;
+                  bottom: 0;
+                  height: 2px;
+                  width: 100%;
+                  background: $accent-color;
+                  // @extend .has-colorloop--bg;
+                }
+              }
+            }
+            ul {
+              display: block;
+            }
+          }
+        }
+        &.more > a:hover ~ ul{
+          display: block;
+        }
+        &.active {
+          &:not(.more){
+            > a {
+              position: relative;
+              &:after {
+                content: '';
+                position: absolute;
+                left: 0;
+                bottom: 0;
+                height: 2px;
+                width: 100%;
+                // @extend .has-colorloop--bg;
+                background: $accent-color;
+              }
+            }
+          }
+        }
+      }
+      @media screen and (max-width: 767px) and (hover: none){
+        display: block;
+        width: 100%;
+      }
+    }
+  }

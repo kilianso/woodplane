@@ -1,0 +1,10 @@
+<div class="main-header__search__form col-sm-6">
+	<p>Search Woodplane</p>
+	<form role="search" method="get" class="search-form text-center" action="{{site.url}}">
+		<input type="search" class="search-field" 
+        placeholder="Enter your search term..." 
+        value="{{function('get_search_query')|e('esc_html')}}" name="s"
+		title="Search">
+		<button type="submit" class="search-submit btn btn-large btn-rounded has-colorloop--bg">Submit</button>
+	</form>
+</div>

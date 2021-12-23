@@ -1,0 +1,12 @@
+<div class="col-12">
+    {% if variant == '404' %}
+        <h2>Woops, this page does not exist. ¯\_(ツ)_/¯</h2>
+        <p>Try to use the search or go back <a href="/">to the homepage.</a></p>
+    {% elseif variant == 'search' %}
+        <p>Woops, nothing found here! ¯\_(ツ)_/¯<br>
+        Try another search term or go <a href="/">back to homepage.</a></p>
+    {% else %}
+        <p>Woops, nothing found here! ¯\_(ツ)_/¯<br>
+        Try to use the search or go <a href="/">back to homepage.</a></p>
+    {% endif %}
+</div>

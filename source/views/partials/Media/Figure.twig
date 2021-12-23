@@ -1,0 +1,9 @@
+<figure itemprop="associatedMedia" itemscope itemtype="http://schema.org/ImageObject">
+    {% if lightbox == true %}
+        <a href="{{function('wp_get_environment_type') != 'local' ? cloudImgUrl~'cdn/n/n/' : ''}}{{post.meta('fullimage')}}" itemprop="contentUrl" data-width="{{post.meta('fullimage_width')}}" data-height="{{post.meta('fullimage_height')}}">
+            {% include 'partials/Media/Image.twig' %}
+        </a>
+    {% else %}
+        {% include 'partials/Media/Image.twig' %}
+    {% endif %}
+</figure>

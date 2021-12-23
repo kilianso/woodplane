@@ -1,0 +1,28 @@
+{% extends "_layout.twig" %}
+
+{% block content %}
+    <section class="home">
+        <div class="container">
+            <div class="row">
+                <div class="col-12">
+                    <h1>Latest Posts</h1>
+                </div>
+                <ul class="posts">
+                    {% for post in posts %}
+                        <li>
+                            <a href="{{post.link}}">
+                                <h2>{{post.title}}</h2>
+                                <p>{{post.content}}</p>
+                            </a>
+                        </li>
+                    {% endfor %}
+                </ul>
+                <div class="col-12 text-center margin--big">
+                    <p>
+                        <a href="/2" class="btn btn-primary">Show more</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}

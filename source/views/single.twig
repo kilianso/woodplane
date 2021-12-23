@@ -1,0 +1,50 @@
+{% extends "_layout.twig" %}
+
+{% block content %}
+    <section class="singlepost">
+        <header class="singlepost__header">
+            <div class="singlepost__inner">
+                <div class="container">
+                    <div class="singlepost__meta col-12">
+                        <small>
+                            <strong>{{post.meta('visible_author') ?: post.author.name}}</strong>
+                            <a target="_blank" href="{{post.meta('origin_url')}}">&nbsp;on {{post.meta('network')}}</a>
+                            —
+                            {{post.post_date_gmt|time_ago}}
+                        </small>
+                    </div>
+                    <div class="singlepost__header__title col-12">
+                        <h1>{{post.title}}</h1>
+                    </div>
+                    <div class="singlepost__interactions col-12">
+                        <div class="singlepost__interaction">
+                            <small>
+                                <a href="{{post.link ~ '#comments'}}">
+                                    <span class="c-count">{{post.get_comment_count ?: null}}</span>
+                                    <span class="c-text">COMMENT</span>
+                                </a>
+                            </small>
+                        </div>
+                    </div>
+                </div>
+                <div class="singlepost__media">
+                    {% if post.meta('video') %}
+                        {% include 'partials/Media/Video.twig' %}
+                    {% else %}
+                        {% include 'partials/Media/Figure.twig'%}
+                    {% endif %}
+                </div>
+            </div>
+        </header>
+        <article class="singlepost__content container is-narrow" id="sharing">
+            <div class="row">
+                <div class="singlepost__content__inner col-sm-10 margin-bottom--big">
+                    {{post.content}}
+                </div>
+            </div>
+        </article>
+        {% if post.comment_status != "closed" or post.get_comment_count %}
+            {{function('comments_template')}}
+        {% endif %}
+    </section>
+{% endblock %}

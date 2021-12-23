@@ -1,0 +1,33 @@
+{% extends "_layout.twig" %}
+
+{% block content %}
+    <section class="search-results">
+        <div class="container">
+            <div class="row">
+                <div class="col-md-5">
+                    <h2>Results for {{query|e('esc_html')}}</h2>
+                </div>
+                <div class="filter-wrapper col-md-7 margin-bottom--small">
+                    <nav class="filter is-mobile" role="navigation">
+                        <ul id="filter__list">
+                            <li class="filter__item {{popular ? null : 'active'}}"><a href="{{site.url ~ '/search/' ~ query}}">Newset</a></li>
+                            <li class="filter__item {{popular ? 'active' : null}}"><a href="{{site.url ~ '/search/' ~ query ~ '?popular'}}">Popular</a></li>
+                        </ul>
+                    </nav>
+                </div>
+                <div class="cards">
+                    {% if results|length%}
+                        {% for post in results %}
+                            <li>{{post.title}}</li>
+                        {% endfor %}
+                    {% else %}
+                        {% include 'partials/no-content.twig' with {variant: 'search'}%}
+                    {% endif %}
+                </div>
+                <div class="col-12 text-center margin--big">
+                    {{ function('next_posts_link', 'Show more', 0 ) }}
+                </div>
+            </div>
+        </div>
+    </section>
+{% endblock %}
