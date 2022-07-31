@@ -1,0 +1,36 @@
+<li id="comment-{{comment.comment_ID}}">
+    <div class="comment__inner">
+        <div class="comment__header">
+            <div class="comment__header__left">
+                <span class="comment__avatar">
+                    {{function('get_avatar', comment, 40, 'retro', comment.comment_author)}}
+                </span>
+                <span class="comment__by">
+                    <strong>{{comment.comment_author}}</strong>
+                    <span class="date">
+                        {{comment.comment_date|time_ago}}
+                    </span>
+                </span>
+            </div>
+            <div class="comment__header__right">
+                <span class="comment__reply">
+                    {{function('get_comment_reply_link', commentReplyArgs, comment.comment_ID)}}
+                </span>
+            </div>
+        </div>
+        <div class="comment__block">
+        {% if comment.comment_approved == false %}
+            <p>This comment is awaiting moderation.</p>
+        {% else %}
+            {{comment.comment_content}}
+        {% endif %}
+        </div>
+    </div>
+    {% if comment.children %}
+        <ul class="children">
+            {% for childComment in comment.children %}
+                {% include "partials/Comment/Comment.twig" with {comment: childComment} %}
+            {% endfor %}
+        </ul>
+    {% endif %}
+</li>

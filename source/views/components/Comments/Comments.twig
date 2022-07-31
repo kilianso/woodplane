@@ -1,0 +1,30 @@
+{% set commentCount = post.get_comment_count|e('esc_html') %}
+{% set commentArgs = {
+		'logged_in_as' : '<p class="comment-notes"><img class="avatar" src="'~ user.avatar ~'">Leave comment as <a href="/user/'~ user.user_nicename ~'">'~ user.nickname ~'</a></p>',
+		'submit_button': '<div class="comment-form-submit text-center margin--small"><button name="%1$s" type="submit" id="%2$s" class="%3$s btn btn-outline btn-rounded">%4$s</button></div>',
+		'comment_notes_before': '<p class="comment-notes"><a href="/auth">Log in</a> or comment as a guest. Your email will not be public.</p>'
+	}
+%}
+
+<section id="comments" class="post_comments">
+	<div class="container is-narrow">
+		<div class="row">
+			<div class="col-sm-12">
+				{% if post.comments|length %}
+					<h2 class="comments-title">{{commentCount == 1 ? commentCount~' Comment' : commentCount~' Comments'}}</h2>
+					<ul class="comment-list">
+			            {{function('comments_template')}}
+					</ul>
+					<div class="col-sm-12 text-center">
+						{{function('get_previous_comments_link', 'More comments')}}
+					</div>
+				{% endif %}
+				{% if function('comments_open') == false %}
+					<p class="no-comments">Comments are closed.</p>
+				{% else %}
+					{{function('comment_form', commentArgs)}}
+				{% endif %}
+			</div>
+		</div>
+	<div>
+</section>
