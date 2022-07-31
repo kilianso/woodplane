@@ -1,105 +1,120 @@
-$(function(){
+// Holy fuck this needs heavy refactoring. What a mess..
+const VideoElements = document.querySelectorAll('.Video');
 
-	// Holy fuck this needs heavy refactoring. What a mess..
-	$(document).on('click','video, .bigPlay, .btnPlay', function() {
-		if ($(this).parents('.Video').length) {
-			var container = $(this).parents('.Video').eq(0);
-			console.log('has .Video parent', container);
+let container;
+let video;
+let controls;
+let bigPlay;
+let btnPlay;
+let btnFs;
+let progress;
 
-			var video = container.find('video'),
-			bigPlay = container.find('.bigPlay'),
-			controls = container.find('.Video__controls');
-			
-			bigPlay.toggleClass('show');
-			controls.toggleClass('show');
-			playpause(video);
-			//display current video play time
-			video.on('timeupdate', function() {
-				var currentPos = $(this)[0].currentTime;
-				var maxduration = $(this)[0].duration;
-				var perc = 100 * currentPos / maxduration;
-				$(this).next().find('.timeBar').css('width', perc + '%');
-				// $(this).closest('.current').text(timeFormat(currentPos));
-			});
-		}
-	});
+if (VideoElements.length) {
+    const playpause = function (videoel) {
+        const icon = btnPlay.querySelector('span');
+        if (videoel.paused || videoel.ended) {
+            btnPlay.classList.add('paused');
+            icon.classList.remove('icon-play');
+            icon.classList.add('icon-pause');
+            videoel.play();
+        } else {
+            btnPlay.classList.remove('paused');
+            icon.classList.remove('icon-pause');
+            icon.classList.add('icon-play');
+            videoel.pause();
+        }
+    };
 
-	//fullscreen button clicked
-	$(document).on('click','.btnFS', function() {
-		var container = $(this).closest('.Video');
-		var video = container.find('video')[0];
-		// go full-screen
-		if (video.requestFullscreen) {
-			video.requestFullscreen();
-		} else if (video.webkitRequestFullscreen) {
-			video.webkitRequestFullscreen();
-		} else if (video.webkitEnterFullscreen) {
-			video.webkitEnterFullscreen();
-		} else if (video.mozRequestFullScreen) {
-			video.mozRequestFullScreen();
-		} else if (video.msRequestFullscreen) {
-			video.msRequestFullscreen();
-		}else{
-			alert('Your browsers doesn\'t support fullscreen');
-		}
-	});
-	//sound button clicked
-	$(document).on('click','.sound', function() {
-		var container = $(this).closest('.Video');
-		var video = container.find('video');
-		video[0].muted = !video[0].muted;
-		$(this).toggleClass('muted');
-	});
-	//VIDEO PROGRESS BAR
-	//when video timebar clicked
-	var timeDrag = false; /* check for drag event */
-	$(document).on('mousedown touchstart','.progress-bar', function(e) {
-		timeDrag = true;
+
+    const updatebar = (e, t) => {
+        const timebar = container.querySelector('.timeBar');
+        const progressInner = progress.querySelector('.progress');
+        let maxduration = video.duration;
+        let position = e - progressInner.getBoundingClientRect().left;
+        let percentage = 100 * position / progressInner.offsetWidth;
+        if (percentage > 100) {
+            percentage = 100;
+        }
+        if (percentage < 0) {
+            percentage = 0;
+        }
+        //prevent things before video is playing.
+        if (video.readyState > 0) {
+            timebar.style.width = percentage + '%';
+            video.currentTime = maxduration * percentage / 100;
+        }
+    };
+
+    const registerListeners = () => {
+        //fullscreen button clicked
+
+        // Click on small play button
+        btnPlay.addEventListener('click', function() {
+            playpause(video)
+        });
+
+        btnFs.addEventListener('click', function () {
+            if(video.requestFullScreen){
+                video.requestFullScreen();
+            } else if(video.webkitRequestFullScreen){
+                video.webkitRequestFullScreen();
+            } else if(video.mozRequestFullScreen){
+                video.mozRequestFullScreen();
+            }
+        })
+
+        //sound button clicked
+        container.querySelector('.sound').addEventListener('click', function (event) {
+            video.muted = !video.muted;
+            event.target.classList.toggle('muted');
+        });
+
+        //VIDEO PROGRESS BAR
+        //when video timebar clicked
+		progress.addEventListener('touchend', (e) => progressHandler(e));
+		progress.addEventListener('mouseup', (e) => progressHandler(e));
+
+        //display current video play time
+        video.addEventListener('timeupdate', function () {
+            let currentPos = video.currentTime;
+            let maxduration = video.duration;
+            let perc = 100 * currentPos / maxduration;
+            controls.querySelector('.timeBar').style.width = perc + '%';
+        });
+    }
+
+	const progressHandler = (e) => {
 		updatebar(e.pageX, e.target);
-	});
-	$(document).on('mouseup touchend', '.progress-bar', function(e) {
-		if (timeDrag) {
-			timeDrag = false;
-			updatebar(e.pageX, e.target);
-		}
-	});
-	$(document).on('mousemove touchmove', '.progress-bar', function(e) {
-		if (timeDrag) {
-			updatebar(e.pageX, e.target);
-		}
-	});
-	var updatebar = function(e, t) {
-		var progress = $(t).find('.progress')[0];
-		var video = $(t).closest('.Video').find('video')[0];
-		var timebar = $(t).find('.timeBar')
-		//calculate drag position
-		//and update video currenttime
-		//as well as progress bar
-		var maxduration = video.duration;
-		var position = e - $(progress).offset().left;
-		var percentage = 100 * position / $(progress).width();
-		if (percentage > 100) {
-			percentage = 100;
-		}
-		if (percentage < 0) {
-			percentage = 0;
-		}
-		//prevent things before video is playing.
-		if(video.readyState > 0){
-			$(timebar).css('width', percentage + '%');
-			video.currentTime = maxduration * percentage / 100;
-		}
-	};
-	var playpause = function(videoel) {
-		var container = $(videoel).closest('.Video');
-		if (videoel[0].paused || videoel[0].ended) {
-			container.find('.btnPlay').addClass('paused');
-			container.find('.btnPlay').find('.icon-play').addClass('icon-pause').removeClass('icon-play');
-			videoel[0].play();
-		} else {
-			container.find('.btnPlay').removeClass('paused');
-			container.find('.btnPlay').find('.icon-pause').removeClass('icon-pause').addClass('icon-play');
-			videoel[0].pause();
-		}
-	};
-});
+		// if (timeDrag) {
+		// 	timeDrag = false;
+		// }
+		// timeDrag = false;
+	}
+
+    // init
+    document.addEventListener('click', function (event) {
+        if (
+            event.target.matches('video') ||
+            event.target.matches('.bigPlay') ||
+            event.target.matches('.btnPlay')
+        ) {
+            event.preventDefault();
+            if (event.target.parentNode.matches('.Video')) {
+
+                container = event.target.parentNode;
+                video = container.querySelector('video');
+                bigPlay = container.querySelector('.bigPlay');
+                btnPlay = container.querySelector('.btnPlay');
+                btnFs = container.querySelector('.btnFS');
+                controls = container.querySelector('.Video__controls');
+                progress = controls.querySelector('.progress-bar');
+
+                bigPlay.classList.toggle('show');
+                controls.classList.toggle('show');
+                playpause(video);
+                registerListeners();
+            }
+        }
+    })
+
+}
