@@ -2,8 +2,8 @@
 A component based Wordpress starter theme based on Timber.
 
 ## Requirements
-Node 
-Composer 
+Node  
+Composer  
 A Local Wordpress Instance (since this is only the theme)
 
 ## Get started
