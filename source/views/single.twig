@@ -44,7 +44,7 @@
             </div>
         </article>
         {% if post.comment_status != "closed" or post.get_comment_count %}
-            {{function('comments_template')}}
+            {% include "components/Comments/Comments.twig" %}
         {% endif %}
     </section>
 {% endblock %}
