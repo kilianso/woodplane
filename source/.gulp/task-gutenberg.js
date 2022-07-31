@@ -3,7 +3,9 @@ const filter = require('gulp-filter');
 import gulp from 'gulp';
 import webpack from 'webpack';
 import gulpWebpack from 'webpack-stream';
-import livereload from 'gulp-livereload';
+// import livereload from 'gulp-livereload';
+import browserSync from 'browser-sync';
+
 import rename from 'gulp-rename';
 import uglify from 'gulp-uglify';
 
@@ -58,6 +60,6 @@ export const task = config => {
             .pipe(gulp.dest(config.buildDir + 'gutenberg/'))
 
             //reload
-            .pipe(livereload())
+            .pipe(browserSync.stream())
     );
 };

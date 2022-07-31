@@ -1,7 +1,9 @@
 import gulp from 'gulp';
 
 import gulpWebpack from 'webpack-stream';
-import livereload from 'gulp-livereload';
+// import livereload from 'gulp-livereload';
+import browserSync from 'browser-sync';
+
 import rename from 'gulp-rename';
 import uglify from 'gulp-uglify';
 import fs from 'fs';
@@ -46,10 +48,8 @@ export const task = config => {
                     },
                     output: {
                         filename: '[name].js',
-                    },
-                    externals: {
-                        jquery: 'jQuery',
-                    },
+                        publicPath: '/wp-content/themes/woodplane/build/scripts/'
+                    }
                 })
             )
             .on('error', config.errorLog)
@@ -66,7 +66,7 @@ export const task = config => {
             .pipe(gulp.dest(config.buildDir + 'scripts/'))
 
             //reload
-            .pipe(livereload());
+            .pipe(browserSync.stream());
         resolve();
     });
 };

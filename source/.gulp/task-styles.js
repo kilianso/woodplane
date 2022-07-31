@@ -2,11 +2,16 @@ import { src, dest } from 'gulp';
 
 import cleanCSS from 'gulp-clean-css';
 import filter from 'gulp-filter';
-import sass from 'gulp-sass';
+
+import dartSass from 'sass';
+import gulpSass from 'gulp-sass';
+const sass = gulpSass( dartSass );
+
 import sassImportJson from 'gulp-sass-import-json';
 import autoprefixer from 'gulp-autoprefixer';
 import rename from 'gulp-rename';
-import livereload from 'gulp-livereload';
+// import livereload from 'gulp-livereload';
+import browserSync from 'browser-sync';
 import sourcemaps from 'gulp-sourcemaps';
 import editorStyles from 'gulp-editor-styles';
 import sassGlob from 'gulp-sass-glob';
@@ -44,6 +49,6 @@ export const task = config => {
             .pipe(dest(config.buildDir + 'styles/'))
             //reload
             .pipe(filter('**/*.css'))
-            .pipe(livereload())
+            .pipe(browserSync.stream())
     );
 };
