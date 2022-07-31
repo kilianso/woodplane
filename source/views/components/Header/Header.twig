@@ -1,41 +1,31 @@
-<header class="main-header">
+<header class="MainHeader">
 	<div class="container">
-		<div class="row align-items-center">
-			<div class="col-4 text-start">
-				<button class="main-header__navtrigger" data-trigger="nav--open">
-					<a href="#">
-						Menu
-					</a>
+		<div class="row">
+			<div class="col-5 p-0 d-flex align-items-center">
+				<button type="button" class="MainHeader__trigger MainHeader__navtrigger" data-trigger="nav--open">
+					<span>Menu</span>
 				</button>
 			</div>
-			<div class="col-4 text-center">
+			<div class="col">
 				<a href="/">
-					<div class="logo">
-						Logo
-					</div>
+					Logo
 				</a>
 			</div>
-			<div class="col-4 text-end">
-				<button class="main-header__searchtrigger" data-trigger="search--open">
-					<a href="#">
-						Search
-					</a>
+			<div class="col-5 p-0 d-flex align-items-center justify-content-end">
+				<button type="button" class="MainHeader__trigger MainHeader__searchtrigger" data-trigger="search--open">
+					<span>Search</span>
 				</button>
 			</div>
 		</div>
 	</div>
-	<nav class="main-header__nav">
+	<nav class="MainHeader__nav">
 		<div class="container is-narrow">
-			<ul class="main-header__nav__navlist row text-center">
+			<ul class="MainHeader__nav__navlist row text-center">
                 <li>Navitem</li>
 			</ul>
 		</div>
 	</nav>
-	<div class="main-header__search">
-		<div class="container is-narrow">
-			<div class="row search__wrapper">
-                {% include "components/SearchForm/SearchForm.twig" %}
-			</div>
-		</div>
+	<div class="MainHeader__search">
+		{% include "components/SearchForm/SearchForm.twig" %}
 	</div>
 </header>
