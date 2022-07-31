@@ -3,15 +3,16 @@
 namespace Woodplane\Theme\Package;
 
 /**
- * Search Stuff
+ * Ordering posts and search results
  */
-class Search
+
+class Ordering
 {
 
 	public function run()
 	{
 		add_action( 'pre_get_posts', [$this, 'searchResultOrder'] );
-		add_filter( 'pre_get_posts', [$this, 'orderSearchResults'], 99 );
+		add_filter( 'pre_get_posts', [$this, 'orderPosts'], 99 );
 	}
 
 	public function searchResultOrder( $query ) {
@@ -23,15 +24,15 @@ class Search
 		}
 	}
 
-	function orderSearchResults(){
-		if (is_search()) {
+	function orderPosts(){
+		if (is_search() || is_tax() || is_category()) {
 
 			if(isset($_GET['order'])) {
 				$order = $_GET['order'];
 			} else {
 				$order = 'DESC';
 			}
-			
+
 			if( isset($_GET['popular'])){
 				set_query_var('orderby', 'meta_value_num');
 				set_query_var('meta_key', '_post_like_count');

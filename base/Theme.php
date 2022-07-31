@@ -71,20 +71,23 @@ class Theme
 			Package\Assets::class,
 			Package\Comments::class,
 			Package\Gutenberg::class,
+			Package\Language::class,
 			Package\Navigation::class,
-			Package\Search::class,
-			// Package\Sidebars::class, // not needed in this theme
-			// Package\Customizer::class, // not wanted to let editors change things via customizer
+			Package\Ordering::class,
+			Package\Cleanup::class,
 		];
 
 		if ( ! class_exists( 'Timber' ) ) {
+
+			// Global template caching
+			// Timber::$cache = true;
 
 			add_action(
 				'admin_notices', function() {
 					echo '<div class="error"><p>Timber not found. This theme can\'t work without it.</p></div>';
 				}
 			);
-			
+
 			add_filter(
 				'template_include', function( $template ) {
 					return get_stylesheet_directory() . '/static/no-timber.html';
@@ -92,8 +95,15 @@ class Theme
 			);
 			return;
 		} else {
-			// make custom functions available in twig
-			add_filter( 'timber/twig', array( $this, 'add_to_twig' ) );
+			// load classes that are dependend on Timber.
+			// e.g.
+			// $load[] = Package\ExampleClass::class;
+
+			// make currentUrl available in all templates
+			add_filter( 'timber/context', [$this, 'addCurrentUrlToTimberContext']);
+
+			// add custom functions to Twig
+			add_filter( 'timber/twig', [$this, 'add_to_twig'] );
 		}
 
 		/**
@@ -110,44 +120,55 @@ class Theme
 			$load[] = Package\WooCommerce::class;
 		}
 
+		/**
+		 * Load Nextend SSO signup additionals
+		*/
+
 		$this->loadClasses($load);
 
 		add_action( 'after_setup_theme', [$this, 'themeSupports'] );
 		add_action( 'after_setup_theme', [$this, 'contentWidth'], 0 );
-
-		add_action( 'wp_head', [$this, 'pingbackHeader'] );
 		add_filter( 'body_class', [$this, 'bodyClasses'] );
 
+		// SEO optimizations
+		add_action( 'wp_head', [$this, 'pingbackHeader'] );
 		add_filter('robots_txt', [$this, 'addToRoboText']);
 		add_filter('language_attributes', [$this, 'opengraphDoctype']);
-
-		add_action('after_setup_theme', [$this, 'removeAdminBar']);
 		add_filter('the_content', [$this, 'externalLinks'], 999);
 
-		// don't hide fields from admin_url
+		// Don't hide fields from admin_url
 		add_filter( 'is_protected_meta', '__return_false', 999 );
 
 		// no auto wrapping of content into paragraph
 		// remove_filter('the_content', 'wpautop');
 		remove_filter( 'the_excerpt', 'wpautop' );
 
-		// auto warp link within content
+		// auto warp link within content, but only on single post sites
 		add_filter( 'the_content', 'make_clickable', 12 );
 
-		add_action( 'init', [$this, 'isFirstTime']);
+		// Do something for returning visitors
+		// add_action( 'init', [$this, 'isFirstTime']);
 
+		// Include custom post types on tag pages
 		add_filter('request', [$this, 'postTypeTagFix']);
+
+		// Next and previous buttons
 		add_filter('next_posts_link_attributes', [$this, 'postLinkAttributes']);
 		add_filter('previous_posts_link_attributes', [$this, 'postLinkAttributes']);
+
 		add_filter( 'pre_get_document_title', [$this, 'renameTitle'], 5);
+
+		// Prevent subscribers from seeing any of the Wordpress admin stuff
+		add_action('admin_init', [$this, 'restrict_admin'], 1 );
+		add_action('after_setup_theme', [$this, 'removeAdminBar']);
 	}
 
 	/**
-	 * Creates an instance if one isn't already available,
+	 * Creates an instance of this Theme if one isn't already available,
 	 * then return the current instance.
 	 *
-	 * @return object       The class instance.
-	 */
+	 * @return object The class instance.
+	*/
 	public static function getInstance()
 	{
 		if (!isset(self::$instance) && !(self::$instance instanceof Theme)) {
@@ -155,7 +176,7 @@ class Theme
 
 			self::$instance->name    = self::$instance->theme->name;
 			self::$instance->version = self::$instance->theme->version;
-			self::$instance->prefix  = 'wdpln';
+			self::$instance->prefix  = 'sbx';
 			self::$instance->debug   = true; // debug mode for local development
 
 			if (!isset($_SERVER['HTTP_HOST']) || strpos($_SERVER['HTTP_HOST'], '.local') === false && !in_array($_SERVER['REMOTE_ADDR'], ['127.0.0.1', '::1'])) {
@@ -167,10 +188,10 @@ class Theme
 	}
 
 	/**
-	 * Loads and initializes the provided classes.
+	 * Loads and initializes the provided PHP classes.
 	 *
 	 * @param $classes
-	 */
+	*/
 
 	private function loadClasses($classes)
 	{
@@ -184,7 +205,7 @@ class Theme
 			}
 
 			if (property_exists(wdpln_theme()->{$class_set}, $class_short)) {
-				wp_die(sprintf(_x('Ein Problem ist geschehen im Theme. Nur eine PHP-Klasse namens «%1$s» darf dem Theme-Objekt «%2$s» zugewiesen werden.', 'Duplicate PHP class assignmment in Theme', 'wdpln'), $class_short, $class_set), 500);
+				wp_die(sprintf(_x('A problem occured. Only one PHP class with the name «%1$s» can be assigned to the theme object «%2$s».', 'Duplicate PHP class assignmment in Theme', 'sbx'), $class_short, $class_set), 500);
 			}
 
 			wdpln_theme()->{$class_set}->{$class_short} = new $class();
@@ -195,11 +216,22 @@ class Theme
 		}
 	}
 
+	public function add_to_twig($twig) {
+		// add PHPs built in parse_url as Twig function
+		$twig->addFunction(new \Twig\TwigFunction('parse_url', 'parse_url'));
+		return $twig;
+	}
+
+	// Make current URL available in all Twig files. This is especially needed to get the right logout URL on archive and tag pages.
+	public function addCurrentUrlToTimberContext($context) {
+		$context['current_url'] = \Timber\URLHelper::get_current_url();
+		return $context;
+	}
+
 	/**
 	 * Allow the Theme to use additional core features
 	 */
-	public function themeSupports()
-	{
+	public function themeSupports() {
 		// Add default posts and comments RSS feed links to head.
 		add_theme_support( 'automatic-feed-links' );
 
@@ -233,7 +265,7 @@ class Theme
 		) );
 
 		// Set up the WordPress core custom background feature.
-		add_theme_support( 'custom-background', apply_filters( 'wdpln_custom_background_args', array(
+		add_theme_support( 'custom-background', apply_filters( 'sbx_custom_background_args', array(
 			'default-color' => 'ffffff',
 			'default-image' => '',
 		) ) );
@@ -256,7 +288,7 @@ class Theme
 		/**
 		 * Set up the WordPress core custom header feature.
 		 */
-		add_theme_support( 'custom-header', apply_filters( 'wdpln_custom_header_args', array(
+		add_theme_support( 'custom-header', apply_filters( 'sbx_custom_header_args', array(
 			'default-image'          => '',
 			'default-text-color'     => '000000',
 			'width'                  => 1000,
@@ -264,20 +296,6 @@ class Theme
 			'flex-height'            => true,
 			'wp-head-callback'       => $this->headerStyle(),
 		) ) );
-	}
-
-	// Add custom functions to Twig
-	public function add_to_twig( $twig ) {
-		$twig->addFunction(new \Timber\Twig_Function('count_entries', [$this, 'count_entries']));		
-		return $twig;
-	}
-
-	// Timber custom function to count posts in a collection based on tag name
-	public static function count_entries($term_slug, $taxonomy) {
-		$term = get_term_by('name', $term_slug, $taxonomy);
-		if ($term) {
-			return $term->count;
-		}
 	}
 
 	/**
@@ -288,13 +306,13 @@ class Theme
 	 * @global int $content_width
 	 */
 	public function contentWidth() {
-		$GLOBALS['content_width'] = apply_filters( 'wdpln_content_width', 640 );
+		$GLOBALS['content_width'] = apply_filters( 'sbx_content_width', 640 );
 	}
 
 	/**
 	 * Styles the header image and text displayed on the blog.
 	 *
-	 * @see wdpln_custom_header_setup().
+	 * @see sbx_custom_header_setup().
 	 */
 	public function headerStyle() {
 		$header_text_color = get_header_textcolor();
@@ -360,7 +378,7 @@ class Theme
 	* Add Sitemap to robots.txt
 	**/
 	public function addToRoboText($robotext) {
-		$additions = "Sitemap: https://Woodplane.com/sitemap.xml";
+		$additions = "Sitemap: /sitemap.xml";
 		return $robotext . $additions;
 	}
 
@@ -385,6 +403,29 @@ class Theme
 	}
 
 	/**
+	 * Restrict access to the administration screens.
+	 *
+	 * Only administrators will be allowed to access the admin screens,
+	 * all other users will be shown a message instead.
+	 *
+	 * We do allow access for Ajax requests though, since these may be
+	 * initiated from the front end of the site by non-admin users.
+	 */
+	public function restrict_admin() {
+
+		if ( ! current_user_can( 'manage_options' ) && ( ! wp_doing_ajax() ) ) {
+			wp_die( __( 'You are not allowed to access this part of the site.' ) );
+		}
+	}
+
+	public function wp_custom_author_urlbase() {
+		global $wp_rewrite;
+		$author_slug = 'user'; // the new slug name
+		$wp_rewrite->author_base = $author_slug;
+		$wp_rewrite->flush_rules();
+	}
+
+	/**
 	* Add target blank and nofollow to external links
 	**/
 	public function externalLinks($content) {
@@ -405,16 +446,16 @@ class Theme
 	}
 
 	// hide header when returning visitor.
-	public function isFirstTime() {
-		if (isset($_COOKIE['_wp_first_time']) || is_user_logged_in()) {
-			return false;
-		} else {
-			// expires in 30 days.
-			setcookie('_wp_first_time', 1, time() + (WEEK_IN_SECONDS * 4), COOKIEPATH, COOKIE_DOMAIN, false);
+	// public function isFirstTime() {
+	// 	if (isset($_COOKIE['_wp_first_time']) || is_user_logged_in()) {
+	// 		return false;
+	// 	} else {
+	// 		// expires in 30 days.
+	// 		setcookie('_wp_first_time', 1, time() + (WEEK_IN_SECONDS * 4), COOKIEPATH, COOKIE_DOMAIN, false);
 
-			return true;
-		}
-	}
+	// 		return true;
+	// 	}
+	// }
 
 	/**
 	* Include Custom Post Types on Tag-Pages
@@ -437,10 +478,5 @@ class Theme
 			$title = get_bloginfo('title');
 			return $title;
 		}
-	}
-	// get term count in twig
-	public function getTermCountinTwig($term_slug, $taxonomy) {
-		$term = get_term_by('name', $term_slug, $taxonomy);
-		return $term;
 	}
 }
