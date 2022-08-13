@@ -1,0 +1,20 @@
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.8.0/dist/leaflet.css" />
+
+<div class="CitySearch">
+    <label>
+        <span>City</span>
+        <input 
+            type="text" 
+            name="city_autocomplete" 
+            autocomplete="off" 
+            class="js-citySearch" 
+            id="citySearch-{{random()}}" 
+            placeholder="Enter your city or district" 
+            oninvalid="this.setCustomValidity('Search city/district, then select a suggestion.')" 
+            oninput="this.setCustomValidity('')"
+            value="{{user ? user.city : ''}}">
+        <input type="hidden" name="city" value="{{user ? user.city : ''}}">
+        <input type="hidden" name="coordinates" value="{{user ? user.coordinates : ''}}">
+    </label>
+</div>
+{# <div id="map"></div> #}
