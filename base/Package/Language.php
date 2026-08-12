@@ -21,7 +21,7 @@ class Language
 	 */
 	public function loadTranslations()
 	{
-		load_theme_textdomain('sbx', get_template_directory() . '/languages'); // Textdomain Frontend
-		load_theme_textdomain('sbx_admin', get_template_directory() . '/languages'); // Textdomain Admin
+		load_theme_textdomain('wdpln', get_template_directory() . '/languages'); // Textdomain Frontend
+		load_theme_textdomain('wdpln_admin', get_template_directory() . '/languages'); // Textdomain Admin
 	}
 }

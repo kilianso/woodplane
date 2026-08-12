@@ -183,7 +183,7 @@ class Theme
 
 			self::$instance->name    = self::$instance->theme->name;
 			self::$instance->version = self::$instance->theme->version;
-			self::$instance->prefix  = 'sbx';
+			self::$instance->prefix  = 'wdpln';
 			self::$instance->debug   = true; // debug mode for local development
 
 			if (!isset($_SERVER['HTTP_HOST']) || !str_contains($_SERVER['HTTP_HOST'], '.local') && !in_array($_SERVER['REMOTE_ADDR'] ?? '', ['127.0.0.1', '::1'])) {
@@ -212,7 +212,7 @@ class Theme
 			}
 
 			if (property_exists(wdpln_theme()->{$class_set}, $class_short)) {
-				wp_die(sprintf(_x('A problem occured. Only one PHP class with the name «%1$s» can be assigned to the theme object «%2$s».', 'Duplicate PHP class assignmment in Theme', 'sbx'), $class_short, $class_set), 500);
+				wp_die(sprintf(_x('A problem occured. Only one PHP class with the name «%1$s» can be assigned to the theme object «%2$s».', 'Duplicate PHP class assignmment in Theme', 'wdpln'), $class_short, $class_set), 500);
 			}
 
 			wdpln_theme()->{$class_set}->{$class_short} = new $class();
@@ -224,11 +224,31 @@ class Theme
 	}
 
 	public function add_to_twig($twig) {
-		// add PHPs built in parse_url as Twig function
 		$twig->addFunction(new \Twig\TwigFunction('parse_url', 'parse_url'));
+		$twig->addFunction(new \Twig\TwigFunction('count_entries', [$this, 'count_entries']));
+		$twig->addFunction(new \Twig\TwigFunction('get_term_by_name', [$this, 'get_term_by_name']));
 		return $twig;
 	}
 
+	/**
+	 * Twig function: returns the number of posts assigned to a term.
+	 * Usage in Twig: {{ count_entries('my-tag', 'post_tag') }}
+	 */
+	public static function count_entries($term_slug, $taxonomy) {
+		$term = get_term_by('name', $term_slug, $taxonomy);
+		if ($term) {
+			return $term->count;
+		}
+	}
+
+	/**
+	 * Twig function: returns the full WP_Term object for a given term name.
+	 * Useful when you need more than just the count (e.g. term link, description, meta).
+	 * Usage in Twig: {% set term = get_term_by_name('my-tag', 'post_tag') %}
+	 */
+	public static function get_term_by_name($term_slug, $taxonomy) {
+		return get_term_by('name', $term_slug, $taxonomy);
+	}
 
 	/**
 	 * Allow the Theme to use additional core features
@@ -267,7 +287,7 @@ class Theme
 		) );
 
 		// Set up the WordPress core custom background feature.
-		add_theme_support( 'custom-background', apply_filters( 'sbx_custom_background_args', array(
+		add_theme_support( 'custom-background', apply_filters( 'wdpln_custom_background_args', array(
 			'default-color' => 'ffffff',
 			'default-image' => '',
 		) ) );
@@ -290,7 +310,7 @@ class Theme
 		/**
 		 * Set up the WordPress core custom header feature.
 		 */
-		add_theme_support( 'custom-header', apply_filters( 'sbx_custom_header_args', array(
+		add_theme_support( 'custom-header', apply_filters( 'wdpln_custom_header_args', array(
 			'default-image'          => '',
 			'default-text-color'     => '000000',
 			'width'                  => 1000,
@@ -308,13 +328,13 @@ class Theme
 	 * @global int $content_width
 	 */
 	public function contentWidth() {
-		$GLOBALS['content_width'] = apply_filters( 'sbx_content_width', 640 );
+		$GLOBALS['content_width'] = apply_filters( 'wdpln_content_width', 640 );
 	}
 
 	/**
 	 * Styles the header image and text displayed on the blog.
 	 *
-	 * @see sbx_custom_header_setup().
+	 * @see wdpln_custom_header_setup().
 	 */
 	public function headerStyle() {
 		$header_text_color = get_header_textcolor();
