@@ -74,6 +74,7 @@ class Theme
 			Package\Language::class,
 			Package\Navigation::class,
 			Package\Ordering::class,
+			Package\Search::class,
 			Package\Cleanup::class,
 		];
 
@@ -99,11 +100,17 @@ class Theme
 			// e.g.
 			// $load[] = Package\ExampleClass::class;
 
-			// make currentUrl available in all templates
-			add_filter( 'timber/context', [$this, 'addCurrentUrlToTimberContext']);
-
 			// add custom functions to Twig
 			add_filter( 'timber/twig/environment', [$this, 'add_to_twig'] );
+
+			// add menus and custom context to all templates
+			add_filter( 'timber/context', function($context) {
+				// site is already in context in Timber 2.x
+				$context['menu'] = \Timber\Timber::get_menu('primary');
+				$context['menusecondary'] = \Timber\Timber::get_menu('secondary');
+				$context['current_url'] = \Timber\URLHelper::get_current_url();
+				return $context;
+			});
 		}
 
 		/**
@@ -147,7 +154,7 @@ class Theme
 		add_filter( 'the_content', 'make_clickable', 12 );
 
 		// Do something for returning visitors
-		// add_action( 'init', [$this, 'isFirstTime']);
+		add_action( 'init', [$this, 'isFirstTime']);
 
 		// Include custom post types on tag pages
 		add_filter('request', [$this, 'postTypeTagFix']);
@@ -222,11 +229,6 @@ class Theme
 		return $twig;
 	}
 
-	// Make current URL available in all Twig files. This is especially needed to get the right logout URL on archive and tag pages.
-	public function addCurrentUrlToTimberContext($context) {
-		$context['current_url'] = \Timber\URLHelper::get_current_url();
-		return $context;
-	}
 
 	/**
 	 * Allow the Theme to use additional core features
@@ -434,7 +436,7 @@ class Theme
 			function($m) {
 				$hasClass = (bool) preg_match('/class="[^"]*[^"]*"/', $m[0]);
 
-				if (strpos($m[1], home_url()) === false && $hasClass === false)
+				if (!str_contains($m[1], home_url()) && $hasClass === false)
 					return '<a href="'.$m[1].'" rel="nofollow" target="_blank">'.$m[2].'</a>';
 				else
 					return $m[0];
@@ -446,16 +448,16 @@ class Theme
 	}
 
 	// hide header when returning visitor.
-	// public function isFirstTime() {
-	// 	if (isset($_COOKIE['_wp_first_time']) || is_user_logged_in()) {
-	// 		return false;
-	// 	} else {
-	// 		// expires in 30 days.
-	// 		setcookie('_wp_first_time', 1, time() + (WEEK_IN_SECONDS * 4), COOKIEPATH, COOKIE_DOMAIN, false);
+	public function isFirstTime() {
+		if (isset($_COOKIE['_wp_first_time']) || is_user_logged_in()) {
+			return false;
+		} else {
+			// expires in 30 days.
+			setcookie('_wp_first_time', 1, time() + (WEEK_IN_SECONDS * 4), COOKIEPATH, COOKIE_DOMAIN, false);
 
-	// 		return true;
-	// 	}
-	// }
+			return true;
+		}
+	}
 
 	/**
 	* Include Custom Post Types on Tag-Pages
