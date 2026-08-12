@@ -24,7 +24,7 @@ class Jetpack
 		// Add theme support for Infinite Scroll.
 		add_theme_support( 'infinite-scroll', array(
 			'container' => 'main',
-			'render'    => $this->infiniteScrollRender(),
+			'render'    => [$this, 'infiniteScrollRender'],
 			'footer'    => 'page',
 		) );
 

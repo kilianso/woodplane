@@ -214,8 +214,7 @@ class Gutenberg
 	public function extendAdminBodyClass($classes)
 	{
 		global $post;
-		if ($post->post_type ?? false && $post->post_name ?? false) {
-			global $post;
+		if ($post && ($post->post_type ?? false) && ($post->post_name ?? false)) {
 			$classes .= ' post-type-' . $post->post_type . ' post-type-' . $post->post_type . '--' . $post->post_name;
 		}
 		return $classes;

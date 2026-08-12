@@ -9,7 +9,7 @@ if (have_posts()) {
   while(have_posts()) {
     the_post();
 
-    $post = new Timber\Post();
+    $post = Timber::get_post();
     $context['post'] = $post;
 
     Timber::render( array( 'page-' . $post->post_name . '.twig', 'page.twig' ), $context);

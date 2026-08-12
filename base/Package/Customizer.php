@@ -27,11 +27,11 @@ class Customizer
 		if ( isset( $wp_customize->selective_refresh ) ) {
 			$wp_customize->selective_refresh->add_partial( 'blogname', array(
 				'selector'        => '.site-title a',
-				'render_callback' => $this->customizePartialBlogname(),
+				'render_callback' => [$this, 'customizePartialBlogname'],
 			) );
 			$wp_customize->selective_refresh->add_partial( 'blogdescription', array(
 				'selector'        => '.site-description',
-				'render_callback' => $this->customizePartialBlogDescription(),
+				'render_callback' => [$this, 'customizePartialBlogDescription'],
 			) );
 		}
 	}

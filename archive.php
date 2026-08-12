@@ -1,8 +1,7 @@
 <?php
 
 function filterTaxonomies ($haystack) {
-	$needle = 'category';
-	return(strtolower(strpos($haystack, $needle)));
+	return str_contains(strtolower($haystack), 'category');
 }
 
 $subject = get_queried_object();
@@ -25,7 +24,7 @@ if (property_exists($subject, 'taxonomies')){
 
 $context['topLevelTax'] = $topLevelTax;
 
-if (strpos($topLevelTax, '-')) {
+if (str_contains($topLevelTax, '-')) {
 	$context['posttype'] = preg_replace('~ *-.*~', '', $topLevelTax);
 } else {
 	$context['posttype'] = strtolower(property_exists($subject, 'slug') ? $subject->slug : $subject->name);
@@ -33,16 +32,18 @@ if (strpos($topLevelTax, '-')) {
 
 if ($topLevelTax != 'post_tag') {
 		
-	$context['topLevelCats'] = Timber::get_terms($topLevelTax, array(
+	$context['topLevelCats'] = Timber::get_terms([
+		'taxonomy' => $topLevelTax,
 		'parent' => 0,
-		'hide_empty' => true
-	));
+		'hide_empty' => true,
+	]);
 
 	if(is_tax() || is_category()){
-		$term = new Timber\Term();
+		$term = Timber::get_term();
 		$context['term'] = $term;	
-		$context['parent'] = new Timber\Term($term->parent);
+		$context['parent'] = $term->parent ? Timber::get_term($term->parent) : null;
 	}
 }
 
 Timber::render('archive.twig', $context);
+

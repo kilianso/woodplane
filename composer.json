@@ -1,6 +1,7 @@
 {
     "require": {
-        "timber/timber": "^1.19"
+        "php": ">=8.0",
+        "timber/timber": "^2.0"
     },
     "config": {
         "allow-plugins": {

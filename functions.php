@@ -18,9 +18,8 @@ if (!function_exists('dump')) {
 	}
 }
 
-// Require and initialize Timber - Since the theme cannot work without it, we instantiate this early and before other classes
+// Require autoloader - Timber 2.x initializes automatically
 require_once( __DIR__ . '/vendor/autoload.php' );
-$timber = new Timber\Timber();
 
 /*
   The function below auto-loads a class or trait. No need to 

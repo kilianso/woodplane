@@ -1,7 +1,6 @@
 <?php
 
 namespace Woodplane\Theme;
-use Timber\Timber;
 
 /**
  * Theme class which gets loaded in functions.php.
@@ -58,10 +57,11 @@ class Theme
 		$this->theme = wp_get_theme();
 
 		// Sets the Timber directories to find .twig files
-		Timber::$dirname = array( 'templates', 'source/views' );
-
-		// By default, Timber does NOT autoescape values. To enable Twig's autoescape set this to true
-		Timber::$autoescape = false;
+		add_filter('timber/locations', function ($locations) {
+			$locations[] = get_template_directory() . '/templates';
+			$locations[] = get_template_directory() . '/source/views';
+			return $locations;
+		});
 	}
 
 
@@ -77,7 +77,7 @@ class Theme
 			Package\Cleanup::class,
 		];
 
-		if ( ! class_exists( 'Timber' ) ) {
+		if ( ! class_exists( 'Timber\Timber' ) ) {
 
 			// Global template caching
 			// Timber::$cache = true;
@@ -103,7 +103,7 @@ class Theme
 			add_filter( 'timber/context', [$this, 'addCurrentUrlToTimberContext']);
 
 			// add custom functions to Twig
-			add_filter( 'timber/twig', [$this, 'add_to_twig'] );
+			add_filter( 'timber/twig/environment', [$this, 'add_to_twig'] );
 		}
 
 		/**
@@ -179,7 +179,7 @@ class Theme
 			self::$instance->prefix  = 'sbx';
 			self::$instance->debug   = true; // debug mode for local development
 
-			if (!isset($_SERVER['HTTP_HOST']) || strpos($_SERVER['HTTP_HOST'], '.local') === false && !in_array($_SERVER['REMOTE_ADDR'], ['127.0.0.1', '::1'])) {
+			if (!isset($_SERVER['HTTP_HOST']) || !str_contains($_SERVER['HTTP_HOST'], '.local') && !in_array($_SERVER['REMOTE_ADDR'] ?? '', ['127.0.0.1', '::1'])) {
 				self::$instance->debug = false; // production mode (.min files will be used)
 			}
 		}
@@ -294,7 +294,7 @@ class Theme
 			'width'                  => 1000,
 			'height'                 => 250,
 			'flex-height'            => true,
-			'wp-head-callback'       => $this->headerStyle(),
+			'wp-head-callback'       => [$this, 'headerStyle'],
 		) ) );
 	}
 
@@ -476,7 +476,7 @@ class Theme
 	public function renameTitle( $title ) {
 		if ( !is_singular()) {
 			$title = get_bloginfo('title');
-			return $title;
 		}
+		return $title;
 	}
 }
