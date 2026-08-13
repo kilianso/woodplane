@@ -18,8 +18,9 @@ if (!function_exists('dump')) {
 	}
 }
 
-// Require autoloader - Timber 2.x initializes automatically
+// Require autoloader and initialize Timber 2.x
 require_once( __DIR__ . '/vendor/autoload.php' );
+\Timber\Timber::init();
 
 /*
   The function below auto-loads a class or trait. No need to 

@@ -58,8 +58,15 @@ class Theme
 
 		// Sets the Timber directories to find .twig files
 		add_filter('timber/locations', function ($locations) {
-			$locations[] = get_template_directory() . '/templates';
-			$locations[] = get_template_directory() . '/source/views';
+			$dirs = [
+				get_template_directory() . '/templates',
+				get_template_directory() . '/source/views',
+			];
+			foreach ($dirs as $dir) {
+				if (file_exists($dir)) {
+					$locations[] = $dir;
+				}
+			}
 			return $locations;
 		});
 	}
