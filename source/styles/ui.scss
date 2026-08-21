@@ -9,6 +9,8 @@ $context: 'view';
 
 @import "bootstrap/scss/functions";
 @import "bootstrap/scss/variables";
+@import "bootstrap/scss/variables-dark";
+@import "bootstrap/scss/maps";
 @import "bootstrap/scss/mixins";
 @import "bootstrap/scss/utilities";
 @import "bootstrap/scss/utilities/api";
@@ -33,6 +35,12 @@ $context: 'view';
 // templates
 @import 'templates/archive';
 
+// Twig partial styles
+@import '../views/partials/Button/PlayButton';
+@import '../views/partials/CitySearch/CitySearch';
+@import '../views/partials/Media/Video';
+
 // Twig component styles
-@import '../views/partials/**/*.scss';
-@import '../views/components/**/*.scss';
+@import '../views/components/Footer/Footer';
+@import '../views/components/Header/Header';
+@import '../views/components/SearchForm/SearchForm';

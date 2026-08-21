@@ -1,5 +1,6 @@
 // This makes sure Text is visible and Webfonts are just replaced when finished loading.
-import FontFaceObserver from './fontfaceobserver';
+import * as FontFaceObserverModule from './fontfaceobserver';
+const FontFaceObserver = FontFaceObserverModule.default || FontFaceObserverModule;
 
 var font = new FontFaceObserver('wdpln_bold', 'wdpln_regular');
 
