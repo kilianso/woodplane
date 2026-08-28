@@ -25,7 +25,7 @@ if (header) {
 	}
 
 	function showAndHide(e, currentContext, otherContext) {
-		if (!currentContext || !otherContext) return;
+		if (!currentContext) return;
 
 		// if header is not open and search is not open
 		if (!header.classList.contains('is--open') && !currentContext.classList.contains('is--open')) {
@@ -44,7 +44,7 @@ if (header) {
 				header.classList.add('nav--open');
 			}
 			currentContext.classList.add('is--open');
-			otherContext.classList.remove('is--open');
+			if (otherContext) otherContext.classList.remove('is--open');
 		}
 		// if header is already open and clicked context, close everything
 		else {

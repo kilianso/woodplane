@@ -13,7 +13,7 @@ class Navigation
 	public function __construct()
 	{
 		$this->menus = [
-			'menu-1' => esc_html__( 'Primary', 'wdpln' ),
+			'primary' => esc_html__( 'Primary', 'wdpln' ),
 		];
 	}
 
