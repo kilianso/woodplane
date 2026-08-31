@@ -64,7 +64,7 @@ class Theme
 			];
 			foreach ($dirs as $dir) {
 				if (file_exists($dir)) {
-					$locations[] = $dir;
+					$locations[] = [$dir];
 				}
 			}
 			return $locations;

@@ -38,8 +38,8 @@ class Assets
 		$deps = ['wp-edit-blocks'];
 		wp_enqueue_style(wdpln_theme()->prefix . '-admin-editor-style', get_template_directory_uri() . '/build/styles/admin-editor' . (wdpln_theme()->debug ? '' : '.min') . '.css', $deps, filemtime(get_template_directory() . '/build/styles/admin-editor' . (wdpln_theme()->debug ? '' : '.min') . '.css'));
 
-		// $deps[] = [wdpln_theme()->prefix . '-admin-editor-style'];
-		wp_enqueue_style(wdpln_theme()->prefix . '-admin-style', get_template_directory_uri() . '/build/styles/admin' . (wdpln_theme()->debug ? '' : '.min') . '.css', wdpln_theme()->prefix . '-admin-editor-style', filemtime(get_template_directory() . '/build/styles/admin' . (wdpln_theme()->debug ? '' : '.min') . '.css'));
+		$deps[] = wdpln_theme()->prefix . '-admin-editor-style';
+		wp_enqueue_style(wdpln_theme()->prefix . '-admin-style', get_template_directory_uri() . '/build/styles/admin' . (wdpln_theme()->debug ? '' : '.min') . '.css', $deps, filemtime(get_template_directory() . '/build/styles/admin' . (wdpln_theme()->debug ? '' : '.min') . '.css'));
 
 		// Javascript
 		$deps = [];
