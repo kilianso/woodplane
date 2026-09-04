@@ -407,7 +407,7 @@ class Theme
 	* Add Sitemap to robots.txt
 	**/
 	public function addToRoboText($robotext) {
-		$additions = "Sitemap: /sitemap.xml";
+		$additions = "Sitemap: " . home_url('/sitemap.xml');
 		return $robotext . $additions;
 	}
 
