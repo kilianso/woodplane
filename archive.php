@@ -8,18 +8,19 @@ $subject = get_queried_object();
 $context = Timber::context();
 
 $context['posts'] = Timber::get_posts();
-$context['title'] = $subject->label ?: $subject->name;
-$context['description'] = $subject->description;
+// The queried object is null on date archives.
+$context['title'] = ($subject->label ?? '') ?: ($subject->name ?? '');
+$context['description'] = $subject->description ?? '';
 
-$topLevelTax = strtolower($subject->label ?: $subject->name);
+$topLevelTax = strtolower(($subject->label ?? '') ?: ($subject->name ?? ''));
 
-if (property_exists($subject, 'taxonomy')) {
+if (is_object($subject) && property_exists($subject, 'taxonomy')) {
 	$topLevelTax = strtolower($subject->taxonomy);
 } 
 
-if (property_exists($subject, 'taxonomies')){
+if (is_object($subject) && property_exists($subject, 'taxonomies')){
 	$catByTax = array_filter($subject->taxonomies, 'filterTaxonomies');
-	$topLevelTax = reset($catByTax);
+	$topLevelTax = reset($catByTax) ?: $topLevelTax;
 }
 
 $context['topLevelTax'] = $topLevelTax;
@@ -27,7 +28,7 @@ $context['topLevelTax'] = $topLevelTax;
 if (str_contains($topLevelTax, '-')) {
 	$context['posttype'] = preg_replace('~ *-.*~', '', $topLevelTax);
 } else {
-	$context['posttype'] = strtolower(property_exists($subject, 'slug') ? $subject->slug : $subject->name);
+	$context['posttype'] = strtolower(is_object($subject) && property_exists($subject, 'slug') ? $subject->slug : ($subject->name ?? ''));
 }
 
 if ($topLevelTax != 'post_tag') {

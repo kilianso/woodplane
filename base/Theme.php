@@ -122,7 +122,7 @@ class Theme
 				// site is already in context in Timber 2.x
 				$context['menu'] = \Timber\Timber::get_menu('primary');
 				$context['menusecondary'] = \Timber\Timber::get_menu('secondary');
-				$context['current_url'] = \Timber\URLHelper::get_current_url();
+				$context['current_url'] = $this->currentUrl();
 				return $context;
 			});
 		}
@@ -235,6 +235,20 @@ class Theme
 				wdpln_theme()->{$class_set}->{$class_short}->run();
 			}
 		}
+	}
+
+	/**
+	 * URL of the current request, built like WordPress' own links (home_url + request path).
+	 * Timber's URLHelper::get_current_url() repeats the port on non-standard ports (localhost:10019:10019).
+	 */
+	public function currentUrl()
+	{
+		global $wp;
+		$url = home_url(user_trailingslashit($wp->request ?? ''));
+		if (!empty($_SERVER['QUERY_STRING'])) {
+			$url .= '?' . $_SERVER['QUERY_STRING'];
+		}
+		return $url;
 	}
 
 	public function add_to_twig($twig) {
