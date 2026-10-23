@@ -2,14 +2,14 @@
 
 This is the [Woodplane](https://Woodplane.com) Starter Theme. It has an object oriented PHP architecture and comes with a modern Vite-based build system.
 
-# Getting started
+# Using the starter
 
-It is distributed under the GNU General Public License v3.0. Or in short: **It's open source**. You are free to use this starter theme or only parts of it for personal and commercial use!
+It's open source (see [LICENSE](LICENSE)). You are free to use this starter theme or only parts of it for personal and commercial use.
 
 Just clone this repository and run a search for the following values and replace them with the values for your project.
 
 ```
-Name:        Woodplane Theme
+Name:        Woodplane
 Key:         woodplane-theme
 Namespace:   Woodplane
 Prefix:      wdpln
@@ -17,24 +17,23 @@ Prefix:      wdpln
 
 ## System requirements
 
-### NodeJS
+- PHP 8.2+ and WordPress 6.8+ (required by Timber 2)
+- Node and npm, version in `.nvmrc` (Node 24 LTS). If you use [nvm](https://github.com/nvm-sh/nvm), run `nvm use` to switch to it.
+- [Composer](https://getcomposer.org/)
 
-`node` and node package manager `npm` are required to run the build commands.
+## Getting started
 
-The project targets **Node 24 LTS** (see `.nvmrc`). If you use [nvm](https://github.com/nvm-sh/nvm), run `nvm use` to switch to the correct version.
+```bash
+composer install
+npm install
+npm run build
+```
 
-Please visit [https://nodejs.org/en/download/](https://nodejs.org/en/download/) and download the latest LTS version of nodeJS.
+Templates are [Twig](https://twig.symfony.com/) files in `source/views`, rendered by [Timber 2](https://timber.github.io/docs/v2/). Timber is installed with Composer into `vendor/`, so no Timber plugin is needed. `build/` and `vendor/` are not in git.
 
 # Build System
 
 This theme uses [Vite](https://vitejs.dev/) as its build tool.
-
-Install packages using `npm install`:
-
-```
-$ cd path/to/your/project/
-$ npm install
-```
 
 ## Available Commands
 
@@ -95,7 +94,9 @@ The SCSS variable `$context` is defined in `admin-editor.scss` (value `edit`) an
 
 ### Scripts
 
-This theme uses ES modules which are bundled using Vite (powered by Rolldown). The Package Class `Assets` enqueues the resulting files as `<script type="module">`. Dynamic imports become chunks in `build/scripts/`, loaded only when needed. For example: all `source/scripts/ui/*.js` files will be bundled to `build/scripts/ui.js`. There is also a minified version `build/scripts/ui.min.js`.
+This theme uses ES modules which are bundled using Vite (powered by Rolldown). The Package Class `Assets` enqueues the resulting files as `<script type="module">`. Every `source/scripts/*/index.js` is an entry point: `source/scripts/ui/index.js` becomes `build/scripts/ui.js` and the minified `build/scripts/ui.min.js`. Dynamic imports become chunks in `build/scripts/`, loaded only when needed.
+
+jQuery is deregistered on the frontend (`base/Package/Cleanup.php`); the theme's scripts don't use it. If you use SiteGround Optimizer, `Assets.php` excludes the theme's files from its minify and combine options, which would break the module scripts.
 
 ### Plugins
 
@@ -144,12 +145,3 @@ The upload adds or replaces files. `build/` and `vendor/` are mirrored exactly, 
 ### Status
 
 Woodplane itself isn't deployed: `DEPLOY_METHOD` is still a placeholder, so every run skips the upload. Themes based on Woodplane follow the steps above.
-
-
-# Authors
-
--   [Kilian Sonnentrücker](https://github.com/kilianso)
--   [Nico Martin](https://github.com/nico-martin)
--   [Mark Howells-Mead](https://github.com/markhowellsmead/)
--   [Joel Stüdle](https://github.com/joel-st)
--   [Dimitri Suter](https://github.com/gnochi/)
