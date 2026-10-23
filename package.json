@@ -16,21 +16,20 @@
 	},
 	"homepage": "https://github.com/kilianso/Woodplane#readme",
 	"dependencies": {
-		"@wordpress/blocks": "^13.0.0",
-		"@wordpress/i18n": "^5.0.0",
+		"@wordpress/blocks": "^17.0.0",
+		"@wordpress/i18n": "^7.0.0",
 		"leaflet": "^1.9.4"
 	},
 	"devDependencies": {
-		"autoprefixer": "^10.4.19",
-		"bootstrap": "^5.1.3",
-		"cssnano": "^7.0.0",
+		"autoprefixer": "^10.6.1",
+		"bootstrap": "^5.3.8",
+		"cssnano": "^9.9.0",
 		"normalize.css": "^8.0.1",
-		"postcss": "^8.4.38",
-		"sass-embedded": "^1.77.0",
-		"svgo": "^3.3.2",
-		"terser": "^5.31.0",
-		"vite": "^6.0.0",
-		"vite-plugin-live-reload": "^3.0.3"
+		"postcss": "^8.5.31",
+		"sass-embedded": "^1.106.1",
+		"svgo": "^4.1.0",
+		"terser": "^5.51.2",
+		"vite": "^8.3.5"
 	},
 	"scripts": {
 		"dev": "vite build --watch",

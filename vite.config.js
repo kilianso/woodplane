@@ -1,11 +1,10 @@
 import { defineConfig } from 'vite';
 import path from 'path';
 import fs from 'fs';
-import liveReload from 'vite-plugin-live-reload';
 
 // Discover all JS entry files in source/scripts/*/index.js
 function getScriptEntries() {
-	const scriptsDir = path.resolve(__dirname, 'source/scripts');
+	const scriptsDir = path.resolve(import.meta.dirname, 'source/scripts');
 	const entries = {};
 	fs.readdirSync(scriptsDir).forEach(dir => {
 		const indexPath = path.resolve(scriptsDir, dir, 'index.js');
@@ -19,6 +18,7 @@ function getScriptEntries() {
 /**
  * Plugin to generate both minified (.min) and unminified CSS/JS output files.
  * The PHP Asset enqueue expects both variants at build/styles/ui.css + ui.min.css etc.
+ * Dynamic chunks get a .min variant too, and minified files import the minified chunks.
  */
 function outputVariantsPlugin() {
 	return {
@@ -31,7 +31,7 @@ function outputVariantsPlugin() {
 				const { default: cssnano } = await import('cssnano');
 				const postcss = (await import('postcss')).default;
 				const { minify } = await import('terser');
-				const buildDir = path.resolve(__dirname, 'build');
+				const buildDir = path.resolve(import.meta.dirname, 'build');
 
 				// Process CSS files: create .min.css from .css
 				for (const subdir of ['styles']) {
@@ -55,16 +55,19 @@ function outputVariantsPlugin() {
 				for (const subdir of ['scripts']) {
 					const dir = path.join(buildDir, subdir);
 					if (!fs.existsSync(dir)) continue;
-					for (const file of fs.readdirSync(dir)) {
-						if (file.endsWith('.js') && !file.endsWith('.min.js')) {
-							const src = path.join(dir, file);
-							const dest = path.join(dir, file.replace('.js', '.min.js'));
-							const code = fs.readFileSync(src, 'utf8');
-							const result = await minify(code, { sourceMap: true });
-							fs.writeFileSync(dest, result.code);
-							if (result.map) {
-								fs.writeFileSync(dest + '.map', result.map);
-							}
+					const files = fs.readdirSync(dir).filter(file => file.endsWith('.js') && !file.endsWith('.min.js'));
+					for (const file of files) {
+						const src = path.join(dir, file);
+						const dest = path.join(dir, file.replace('.js', '.min.js'));
+						let code = fs.readFileSync(src, 'utf8');
+						// Point imports of sibling chunks to their minified variant
+						for (const sibling of files) {
+							code = code.replaceAll(`"./${sibling}"`, `"./${sibling.replace('.js', '.min.js')}"`);
+						}
+						const result = await minify(code, { module: true, sourceMap: true });
+						fs.writeFileSync(dest, result.code);
+						if (result.map) {
+							fs.writeFileSync(dest + '.map', result.map);
 						}
 					}
 				}
@@ -88,7 +91,7 @@ function extractCssPlugin() {
 			sequential: true,
 			order: 'pre',
 			async handler() {
-				const buildDir = path.resolve(__dirname, 'build');
+				const buildDir = path.resolve(import.meta.dirname, 'build');
 				// Remove the empty JS wrapper files that Vite generates for CSS-only entries
 				// and ensure CSS files exist (even if empty) since the PHP expects them
 				for (const name of cssEntryNames) {
@@ -108,14 +111,31 @@ function extractCssPlugin() {
 	};
 }
 
+/**
+ * Fails the build if a chunk imports an entry. WordPress enqueues the entries with a ?ver= query string,
+ * so the browser would load and evaluate the entry a second time under the plain URL.
+ */
+function entryImportGuardPlugin() {
+	return {
+		name: 'entry-import-guard',
+		apply: 'build',
+		generateBundle(options, bundle) {
+			const chunks = Object.values(bundle).filter(item => item.type === 'chunk');
+			const entries = new Set(chunks.filter(chunk => chunk.isEntry).map(chunk => chunk.fileName));
+			for (const chunk of chunks.filter(chunk => !chunk.isEntry)) {
+				const imported = [...chunk.imports, ...chunk.dynamicImports].filter(file => entries.has(file));
+				if (imported.length) {
+					this.error(`${chunk.fileName} imports the entry ${imported.join(', ')}. Move the shared code into its own chunk (codeSplitting).`);
+				}
+			}
+		},
+	};
+}
+
 export default defineConfig({
 	base: './',
 	plugins: [
-		// Live reload when PHP/Twig files change
-		liveReload([
-			'./**/*.php',
-			'source/**/*.twig',
-		]),
+		entryImportGuardPlugin(),
 		extractCssPlugin(),
 		outputVariantsPlugin(),
 	],
@@ -124,7 +144,7 @@ export default defineConfig({
 		preprocessorOptions: {
 			scss: {
 				// Make node_modules importable with bare specifiers (for bootstrap etc.)
-				loadPaths: [path.resolve(__dirname, 'node_modules')],
+				loadPaths: [path.resolve(import.meta.dirname, 'node_modules')],
 				// Silence deprecation warnings from Bootstrap 5.1's legacy Sass APIs
 				silenceDeprecations: ['import', 'global-builtin', 'color-functions', 'if-function'],
 			},
@@ -139,21 +159,28 @@ export default defineConfig({
 		// Don't minify — we generate .min variants via the outputVariantsPlugin
 		minify: false,
 
-		rollupOptions: {
+		rolldownOptions: {
 			input: {
 				// SCSS entries (will produce CSS files)
-				'styles/ui': path.resolve(__dirname, 'source/styles/ui.scss'),
-				'styles/admin': path.resolve(__dirname, 'source/styles/admin.scss'),
-				'styles/admin-editor': path.resolve(__dirname, 'source/styles/admin-editor.scss'),
+				'styles/ui': path.resolve(import.meta.dirname, 'source/styles/ui.scss'),
+				'styles/admin': path.resolve(import.meta.dirname, 'source/styles/admin.scss'),
+				'styles/admin-editor': path.resolve(import.meta.dirname, 'source/styles/admin-editor.scss'),
 				// JS entries
 				...getScriptEntries(),
 			},
 			output: {
 				entryFileNames: '[name].js',
-				// Prevent code-splitting — WordPress enqueues each entry as a single file
-				manualChunks: undefined,
-				inlineDynamicImports: false,
-				chunkFileNames: 'scripts/[name].js',
+				// Dynamic imports (e.g. Leaflet for the CitySearch) are loaded on demand as chunks.
+				// The entries are enqueued with a ?ver= query string, so chunks must never import
+				// an entry: the browser would evaluate it a second time. Shared helpers get their own chunk
+				// (Rolldown then also moves its runtime into rolldown-runtime-[hash].js); entryImportGuardPlugin checks the result.
+				codeSplitting: {
+					groups: [{
+						name: 'vendor-helpers',
+						test: id => id === '\0rolldown/runtime.js' || id.includes('vite/preload-helper'),
+					}],
+				},
+				chunkFileNames: 'scripts/[name]-[hash].js',
 				assetFileNames: '[name][extname]',
 			},
 		},
