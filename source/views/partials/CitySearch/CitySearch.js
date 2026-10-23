@@ -1,23 +1,19 @@
-const { Autocomplete } = require('../../../scripts/ui/vendor/autocomplete');
-
 const citySearch = document.querySelectorAll('.js-citySearch');
 
 if(citySearch.length) {
 
-    console.log(true);
-
     (async () => {
         const [L, Autocomplete, init] = await Promise.all([
-            import(/* webpackChunkName: "leaflet" */'leaflet').then(module => module.default),
-            import(/* webpackChunkName: "autocomplete" */'../../../scripts/ui/vendor/autocomplete').then(module => module.Autocomplete),
-            import(/* webpackChunkName: "citySearch"*/'./init.js').then(module => module.init)
+            import('leaflet').then(module => module.default),
+            import('../../../scripts/ui/vendor/autocomplete.js').then(module => module.Autocomplete),
+            import('./init.js').then(module => module.init)
         ]);
 
         citySearch.forEach(el => {
             init(Autocomplete, L, el);
         })
 
-    })();
+    })().catch(error => console.error('City search could not be loaded.', error));
 
     // Another approach would be to use a Promise based syntax. But async/await is preferable.
 

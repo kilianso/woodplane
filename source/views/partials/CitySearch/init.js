@@ -1,3 +1,5 @@
+import 'leaflet/dist/leaflet.css';
+
 export const init = (Autocomplete, L, el) => {
 
     const parent = el.parentNode;
