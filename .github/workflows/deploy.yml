@@ -1,0 +1,181 @@
+name: Build and deploy theme
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: production-theme-deploy
+  cancel-in-progress: false
+
+env:
+  # How to upload the theme. Pick what your hosting offers:
+  #   ssh  = rsync over SSH (needs shell access and rsync on the server)
+  #   sftp = SFTP only (works without shell access)
+  DEPLOY_METHOD: '__METHOD__'
+  # Deployment target. Not secret. The credential is a repository secret (Settings → Secrets and variables → Actions):
+  #   DEPLOY_PASSWORD, or DEPLOY_SSH_KEY (private key) plus DEPLOY_SSH_KEY_PASSPHRASE if the key has one.
+  DEPLOY_HOST: '__HOST__'
+  DEPLOY_PORT: '__PORT__'
+  DEPLOY_USER: '__USER__'
+  # Theme directory on the server: absolute, or relative to the login directory ('.' if the login starts there)
+  DEPLOY_PATH: '__PATH__'
+  # Extra ssh options, e.g. '-o HostKeyAlgorithms=+ssh-rsa' for servers that still need it
+  SSH_OPTIONS: ''
+  # Runtime files of the theme; everything else (source maps, configs, node_modules) stays out
+  THEME_DIRS: 'base build source static vendor'
+  THEME_FILES: '*.php style.css screenshot.* LICENSE'
+
+jobs:
+  deploy:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+
+    steps:
+      - name: Check deployment configuration
+        env:
+          DEPLOY_PASSWORD: ${{ secrets.DEPLOY_PASSWORD || secrets.SFTP_PASSWORD }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+        run: |
+          if [[ "$DEPLOY_METHOD" != ssh && "$DEPLOY_METHOD" != sftp ]]; then
+            echo "::error::Set DEPLOY_METHOD to 'ssh' or 'sftp' in this workflow."
+            exit 1
+          fi
+          for setting in DEPLOY_HOST DEPLOY_PORT DEPLOY_USER DEPLOY_PATH; do
+            if [[ -z "${!setting}" || "${!setting}" == __* ]]; then
+              echo "::error::Set $setting in this workflow before deploying."
+              exit 1
+            fi
+          done
+          if [[ -z "$DEPLOY_PASSWORD" && -z "$DEPLOY_SSH_KEY" ]]; then
+            echo "::error::Add the DEPLOY_PASSWORD or DEPLOY_SSH_KEY repository secret before deploying."
+            exit 1
+          fi
+
+      - name: Check out theme
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+
+      - name: Check server host key
+        run: |
+          if [[ ! -s .github/known_hosts ]]; then
+            echo "::error::Add the server's verified host key to .github/known_hosts (see README → Deployment)."
+            exit 1
+          fi
+
+      - name: Set up Node.js
+        uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Set up PHP and Composer
+        uses: shivammathur/setup-php@d52fc211a0436f8839a587b3b5b8efddab4744ea # v2
+        with:
+          php-version: '8.2'
+          extensions: mbstring
+          tools: composer:v2
+          coverage: none
+
+      - name: Install production PHP dependencies
+        run: composer install --no-dev --prefer-dist --no-interaction --no-progress --optimize-autoloader
+
+      - name: Build assets
+        run: |
+          npm ci
+          npm run build
+
+      - name: Check theme PHP syntax
+        run: |
+          find . -path './vendor' -prune -o -path './node_modules' -prune -o -name '*.php' -print0 |
+            xargs -0 -n 1 php -l
+
+      - name: Prepare theme files
+        run: |
+          mkdir -p "$RUNNER_TEMP/theme"
+          rsync -a --exclude='*.map' $THEME_DIRS "$RUNNER_TEMP/theme/"
+          cp $THEME_FILES "$RUNNER_TEMP/theme/"
+          test -s "$RUNNER_TEMP/theme/vendor/autoload.php"
+          test -s "$RUNNER_TEMP/theme/build/styles/ui.min.css"
+          test -s "$RUNNER_TEMP/theme/build/scripts/ui.min.js"
+          test -s "$RUNNER_TEMP/theme/source/views/_layout.twig"
+
+      - name: Install deployment tools
+        env:
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+        run: |
+          packages=()
+          [[ "$DEPLOY_METHOD" == sftp ]] && packages+=(lftp)
+          [[ "$DEPLOY_METHOD" == ssh && -z "$DEPLOY_SSH_KEY" ]] && packages+=(sshpass)
+          if (( ${#packages[@]} )); then
+            sudo apt-get update
+            sudo apt-get install --yes --no-install-recommends "${packages[@]}"
+          fi
+
+      - name: Deploy theme
+        env:
+          DEPLOY_PASSWORD: ${{ secrets.DEPLOY_PASSWORD || secrets.SFTP_PASSWORD }}
+          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
+          DEPLOY_SSH_KEY_PASSPHRASE: ${{ secrets.DEPLOY_SSH_KEY_PASSPHRASE }}
+        run: |
+          ssh_options="-a -x -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$GITHUB_WORKSPACE/.github/known_hosts -o ConnectTimeout=20 $SSH_OPTIONS"
+          if [[ -n "$DEPLOY_SSH_KEY" ]]; then
+            key="$RUNNER_TEMP/deploy_key"
+            install -m 600 /dev/null "$key"
+            printf '%s\n' "$DEPLOY_SSH_KEY" > "$key"
+            if [[ -n "$DEPLOY_SSH_KEY_PASSPHRASE" ]]; then
+              # Remove the passphrase from the runner's temporary copy, so rsync and lftp can use it non-interactively
+              ssh-keygen -q -p -P "$DEPLOY_SSH_KEY_PASSPHRASE" -N '' -f "$key"
+            fi
+            ssh_options="$ssh_options -i $key -o IdentitiesOnly=yes -o PasswordAuthentication=no"
+          else
+            ssh_options="$ssh_options -o PubkeyAuthentication=no -o NumberOfPasswordPrompts=1"
+          fi
+
+          # build/ and vendor/ are fully generated: remove files the new build no longer contains (e.g. old hashed chunks).
+          # Everything else is only added or overwritten, never deleted.
+          if [[ "$DEPLOY_METHOD" == ssh ]]; then
+            password=()
+            if [[ -z "$DEPLOY_SSH_KEY" ]]; then
+              export SSHPASS="$DEPLOY_PASSWORD"
+              password=(sshpass -e)
+            fi
+            remote="$DEPLOY_USER@$DEPLOY_HOST:$DEPLOY_PATH"
+            # --checksum: compare by content, since a fresh checkout gives every file a new modification time.
+            # No -t: a file's modification time on the server (used as ?ver= in Assets.php) only changes with its content.
+            upload() {
+              "${password[@]}" rsync -rlz --checksum --delay-updates --exclude='.lftp-*' -e "ssh -p $DEPLOY_PORT $ssh_options" "$@"
+            }
+            upload --itemize-changes "$RUNNER_TEMP/theme/" "$remote/"
+            upload --delete --itemize-changes "$RUNNER_TEMP/theme/build/" "$remote/build/"
+            upload --delete --itemize-changes "$RUNNER_TEMP/theme/vendor/" "$remote/vendor/"
+          else
+            if [[ -n "$DEPLOY_SSH_KEY" ]]; then
+              login="--user $DEPLOY_USER,"
+            else
+              export LFTP_PASSWORD="$DEPLOY_PASSWORD"
+              login="--env-password --user $DEPLOY_USER"
+            fi
+            lftp --norc <<LFTP
+          set cmd:fail-exit yes
+          set net:timeout 20
+          set net:max-retries 2
+          set net:reconnect-interval-base 5
+          set sftp:auto-confirm no
+          set sftp:connect-program "ssh $ssh_options"
+          set xfer:use-temp-file yes
+          set xfer:temp-file-name .lftp-*.tmp
+          open $login sftp://$DEPLOY_HOST:$DEPLOY_PORT
+          cd "$DEPLOY_PATH"
+          mirror --reverse --verbose --parallel=2 --no-perms --no-symlinks "$RUNNER_TEMP/theme/" .
+          mirror --reverse --delete --verbose --parallel=2 --no-perms --no-symlinks "$RUNNER_TEMP/theme/build/" build
+          mirror --reverse --delete --verbose --parallel=2 --no-perms --no-symlinks "$RUNNER_TEMP/theme/vendor/" vendor
+          bye
+          LFTP
+          fi
