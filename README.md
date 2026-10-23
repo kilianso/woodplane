@@ -97,6 +97,18 @@ The SCSS variable `$context` is defined in `admin-editor.scss` (value `edit`) an
 
 This theme uses ES modules which are bundled using Vite (powered by Rolldown). The Package Class `Assets` enqueues the resulting files as `<script type="module">`. Dynamic imports become chunks in `build/scripts/`, loaded only when needed. For example: all `source/scripts/ui/*.js` files will be bundled to `build/scripts/ui.js`. There is also a minified version `build/scripts/ui.min.js`.
 
+### Plugins
+
+The theme must keep working when a plugin is missing or deactivated. Guard plugin functions called from Twig, otherwise they are a fatal error without the plugin:
+
+```twig
+{% if function('function_exists', 'plugin_function') %}
+    {{ function('plugin_function') }}
+{% endif %}
+```
+
+Use `class_exists` for classes (also for `'Class::method'` calls). In PHP, load plugin-specific packages only when the plugin is active, as `Theme.php` does for WooCommerce and Jetpack.
+
 ### Fonts
 
 Fonts are self-hosted (no requests to Google). `source/styles/base/_fontimport.scss` declares them with `font-display: swap`, so text shows in the fallback font until the webfont is loaded; Vite copies the woff2 files to `build/`. Preload fonts used on every page with `<link rel="preload" as="font" type="font/woff2" crossorigin>` in the HTML head. For Google Fonts, use the matching [Fontsource](https://fontsource.org/) npm package (e.g. `@import '@fontsource/playfair-display/500';`) instead of `fonts.googleapis.com`.
