@@ -1,6 +1,7 @@
-build/
-node_modules/
-vendor/
+# Generated or installed at the theme root only (source/scripts/ui/vendor is source code)
+/build/
+/node_modules/
+/vendor/
 .lock
 .sass-cache/
 .DS_Store
