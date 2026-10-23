@@ -21,7 +21,7 @@ Prefix:      wdpln
 
 `node` and node package manager `npm` are required to run the build commands.
 
-The project targets **Node 20 LTS** (see `.nvmrc`). If you use [nvm](https://github.com/nvm-sh/nvm), run `nvm use` to switch to the correct version.
+The project targets **Node 24 LTS** (see `.nvmrc`). If you use [nvm](https://github.com/nvm-sh/nvm), run `nvm use` to switch to the correct version.
 
 Please visit [https://nodejs.org/en/download/](https://nodejs.org/en/download/) and download the latest LTS version of nodeJS.
 
@@ -41,7 +41,7 @@ $ npm install
 | Command | Description |
 |---|---|
 | `npm run build` | Production build — compiles SCSS, bundles JS, outputs to `build/` |
-| `npm run dev` | Watch mode — rebuilds on file changes with live reload |
+| `npm run dev` | Watch mode — rebuilds on file changes (reload the browser manually) |
 | `npm run svgo` | Optimize SVGs in `static/` |
 
 ## Feature overview
@@ -95,23 +95,39 @@ The SCSS variable `$context` is defined in `admin-editor.scss` (value `edit`) an
 
 ### Scripts
 
-This theme uses ES modules which are bundled using Vite (powered by Rollup). The Package Class `Assets` enqueues the resulting files. For example: all `source/scripts/ui/*.js` files will be bundled to `build/scripts/ui.js`. There is also a minified version `build/scripts/ui.min.js`.
+This theme uses ES modules which are bundled using Vite (powered by Rolldown). The Package Class `Assets` enqueues the resulting files as `<script type="module">`. Dynamic imports become chunks in `build/scripts/`, loaded only when needed. For example: all `source/scripts/ui/*.js` files will be bundled to `build/scripts/ui.js`. There is also a minified version `build/scripts/ui.min.js`.
 
 ### Fonts
 
-There is a built in Font loading process using base64 encoded woff/woff2 fonts, which are stored inside the local storage of the browser. This avoids the FOUT problem.
-
-Assuming that the fonts you're using are licensed for use in this way, convert the fonts to base64-encoded WOFF and WOFF2 CSS files using [Transfonter](https://transfonter.org/) and then add the code to the files in the `static/fonts` folder.
-
-### Live Reload
-
-In development mode (`npm run dev`), changes to PHP and Twig files will trigger a live page reload automatically via [vite-plugin-live-reload](https://github.com/nickmessing/vite-plugin-live-reload).
+Fonts are self-hosted (no requests to Google). `source/styles/base/_fontimport.scss` declares them with `font-display: swap`, so text shows in the fallback font until the webfont is loaded; Vite copies the woff2 files to `build/`. Preload fonts used on every page with `<link rel="preload" as="font" type="font/woff2" crossorigin>` in the HTML head. For Google Fonts, use the matching [Fontsource](https://fontsource.org/) npm package (e.g. `@import '@fontsource/playfair-display/500';`) instead of `fonts.googleapis.com`.
 
 ### SVG
 
 SVG support and sanitization was formerly handled directly by the Theme. This feature was removed in 2020 in favour of https://wordpress.org/plugins/safe-svg/.
 
 SVG optimization is handled by [SVGO](https://github.com/svg/svgo) via `npm run svgo`.
+
+## Deployment
+
+[Build and deploy theme](.github/workflows/deploy.yml) builds the theme on GitHub and uploads it to the server on every push to `main`, or manually from the **Actions** tab. `build/` and `vendor/` are not in git; the workflow creates them with `npm run build` and `composer install --no-dev`.
+
+Configure it at the top of the workflow:
+
+- `DEPLOY_METHOD`: `ssh` uploads with rsync over SSH (needs shell access and rsync on the server, only transfers changed files), `sftp` uploads with lftp over SFTP (works with SFTP-only accounts).
+- `DEPLOY_HOST`, `DEPLOY_PORT`, `DEPLOY_USER`, and `DEPLOY_PATH` (the theme directory on the server, absolute or relative to the login directory).
+- `SSH_OPTIONS` for servers that need special ssh settings, e.g. `-o HostKeyAlgorithms=+ssh-rsa`.
+
+Add the credential as a repository secret (Settings → Secrets and variables → Actions), for either method:
+
+- `DEPLOY_PASSWORD`, or
+- `DEPLOY_SSH_KEY` (the private key, including the `-----BEGIN`/`END` lines) and, if the key has one, `DEPLOY_SSH_KEY_PASSPHRASE`. A dedicated deploy key is recommended.
+
+Pin the server's host key, so the workflow only connects to the real server: `ssh-keyscan -p <port> <host> | grep -v '^#' > .github/known_hosts`, then compare `ssh-keygen -lf .github/known_hosts` with the fingerprints your hosting provider shows.
+
+The upload adds or replaces files. `build/` and `vendor/` are mirrored exactly, so files the build no longer produces (e.g. old hashed chunks) are deleted on the server; nothing else is deleted. The theme is updated in place, not switched atomically. The workflow refuses to run until the settings, the secret and the host key are in place.
+
+This theme isn't deployed yet; the workflow is a ready-to-configure placeholder.
+
 
 # Authors
 
