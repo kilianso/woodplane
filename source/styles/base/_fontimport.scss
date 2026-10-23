@@ -1,18 +1,20 @@
-// @import url('https://fonts.googleapis.com/css?family=Poppins:300,700');
-// @import url('https://fonts.googleapis.com/css?family=Open+Sans:400|Lato:900');
-
+// Self-hosted webfonts. font-display: swap shows the fallback font until the webfont is loaded.
+// The bold face is declared as bold, so the fallback renders bold while loading and the webfont isn't bolded synthetically.
+// Preload the woff2 files that are used on every page in the HTML head: <link rel="preload" href="…/build/wdpln_regular.woff2" as="font" type="font/woff2" crossorigin>.
 @font-face {
     font-family: 'wdpln_regular';
-    src: url('../../static/fonts/wdpln_regular.woff2') format('woff2'), url('../../static/fonts/wdpln_regular.woff') format('woff');
+    src: url('../../../static/fonts/wdpln_regular.woff2') format('woff2');
     font-weight: normal;
     font-style: normal;
+    font-display: swap;
 }
 
 @font-face {
     font-family: 'wdpln_bold';
-    src: url('../../static/fonts/wdpln_bold.woff2') format('woff2'), url('../../static/fonts/wdpln_bold.woff') format('woff');
-    font-weight: normal;
+    src: url('../../../static/fonts/wdpln_bold.woff2') format('woff2');
+    font-weight: bold;
     font-style: normal;
+    font-display: swap;
 }
 
 .material-icons {

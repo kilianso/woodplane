@@ -1,5 +1,4 @@
 //--- VENDOR ---//
-import './core/fonts';
 
 //---- MODULES ---//
 
