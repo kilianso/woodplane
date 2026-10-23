@@ -10,7 +10,8 @@
 	<div class="container is-narrow">
 		<div class="row">
 			<div class="col-sm-12">
-				{% if post.comments|length %}
+				{# The count, not post.comments: Timber 2's CommentThread sets the comment page to 0, which breaks the paging links of comments_template() #}
+				{% if commentCount > 0 %}
 					<h2 class="comments-title">{{commentCount == 1 ? commentCount~' Comment' : commentCount~' Comments'}}</h2>
 					<ul class="comment-list">
 			            {{function('comments_template')}}
