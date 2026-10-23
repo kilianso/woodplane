@@ -20,7 +20,7 @@
                         <div class="singlepost__interaction">
                             <small>
                                 <a href="{{post.link ~ '#comments'}}">
-                                    <span class="c-count">{{post.get_comment_count ?: null}}</span>
+                                    <span class="c-count">{{post.comment_count() ?: null}}</span>
                                     <span class="c-text">COMMENT</span>
                                 </a>
                             </small>
@@ -43,7 +43,7 @@
                 </div>
             </div>
         </article>
-        {% if post.comment_status != "closed" or post.get_comment_count %}
+        {% if post.comment_status != "closed" or post.comment_count() %}
             {% include "components/Comments/Comments.twig" %}
         {% endif %}
     </section>

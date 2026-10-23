@@ -52,6 +52,13 @@ class Theme
 	 */
 	public $debug = false;
 
+	/**
+	 * Loaded theme packages.
+	 *
+	 * @var \stdClass|null
+	 */
+	public $Package;
+
 	public function __construct()
 	{
 		$this->theme = wp_get_theme();

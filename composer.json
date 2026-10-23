@@ -1,6 +1,6 @@
 {
     "require": {
-        "php": ">=8.0",
+        "php": ">=8.2",
         "timber/timber": "^2.0"
     },
     "config": {

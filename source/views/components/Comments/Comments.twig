@@ -1,4 +1,4 @@
-{% set commentCount = post.get_comment_count|e('esc_html') %}
+{% set commentCount = post.comment_count()|e('esc_html') %}
 {% set commentArgs = {
 		'logged_in_as' : '<p class="comment-notes"><img class="avatar" src="'~ user.avatar ~'">Leave comment as <a href="/user/'~ user.user_nicename ~'">'~ user.nickname ~'</a></p>',
 		'submit_button': '<div class="comment-form-submit text-center margin--small"><button name="%1$s" type="submit" id="%2$s" class="%3$s btn btn-outline btn-rounded">%4$s</button></div>',
