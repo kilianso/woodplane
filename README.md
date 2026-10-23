@@ -123,22 +123,27 @@ SVG optimization is handled by [SVGO](https://github.com/svg/svgo) via `npm run 
 
 [Build and deploy theme](.github/workflows/deploy.yml) builds the theme on GitHub and uploads it to the server on every push to `main`, or manually from the **Actions** tab. `build/` and `vendor/` are not in git; the workflow creates them with `npm run build` and `composer install --no-dev`.
 
-Configure it at the top of the workflow:
+Until deployment is set up, nothing is uploaded: the run stays green, the deploy job shows as skipped, and the run summary lists what's missing. Only an invalid `DEPLOY_METHOD` value fails the run.
 
-- `DEPLOY_METHOD`: `ssh` uploads with rsync over SSH (needs shell access and rsync on the server, only transfers changed files), `sftp` uploads with lftp over SFTP (works with SFTP-only accounts).
-- `DEPLOY_HOST`, `DEPLOY_PORT`, `DEPLOY_USER`, and `DEPLOY_PATH` (the theme directory on the server, absolute or relative to the login directory).
-- `SSH_OPTIONS` for servers that need special ssh settings, e.g. `-o HostKeyAlgorithms=+ssh-rsa`.
+### Set it up
 
-Add the credential as a repository secret (Settings → Secrets and variables → Actions), for either method:
+1. **Choose the method.** In the `env` block at the top of the workflow, set `DEPLOY_METHOD` to `ssh` (rsync over SSH: needs shell access and rsync on the server, transfers only changed files) or `sftp` (works with SFTP-only accounts).
+2. **Set the target** in the same block: `DEPLOY_HOST`, `DEPLOY_PORT`, `DEPLOY_USER` and `DEPLOY_PATH` (the theme directory on the server, absolute or relative to the login directory). Set `SSH_OPTIONS` only if the server needs it, e.g. `-o HostKeyAlgorithms=+ssh-rsa`. These values are not secret.
+3. **Add the credential on GitHub** under **Settings → Secrets and variables → Actions → New repository secret**, either:
+    - `DEPLOY_PASSWORD`, or
+    - `DEPLOY_SSH_KEY`: the private key, including the `-----BEGIN`/`END` lines, plus `DEPLOY_SSH_KEY_PASSPHRASE` if the key has one. Use a dedicated deploy key, with its public key authorized on the server.
+4. **Pin the server's host key**, so the workflow only connects to the real server: run `ssh-keyscan -p <port> <host> | grep -v '^#' > .github/known_hosts`, check that `ssh-keygen -lf .github/known_hosts` shows the fingerprints your hosting provider publishes, and commit the file.
+5. **Deploy** by pushing to `main` or with **Run workflow** in the **Actions** tab, and check the log of the first run.
 
-- `DEPLOY_PASSWORD`, or
-- `DEPLOY_SSH_KEY` (the private key, including the `-----BEGIN`/`END` lines) and, if the key has one, `DEPLOY_SSH_KEY_PASSPHRASE`. A dedicated deploy key is recommended.
+To deploy from another branch, replace `main` under `on.push.branches` and in the `check` job's `if`.
 
-Pin the server's host key, so the workflow only connects to the real server: `ssh-keyscan -p <port> <host> | grep -v '^#' > .github/known_hosts`, then compare `ssh-keygen -lf .github/known_hosts` with the fingerprints your hosting provider shows.
+### How it uploads
 
-The upload adds or replaces files. `build/` and `vendor/` are mirrored exactly, so files the build no longer produces (e.g. old hashed chunks) are deleted on the server; nothing else is deleted. The theme is updated in place, not switched atomically. The workflow refuses to run until the settings, the secret and the host key are in place.
+The upload adds or replaces files. `build/` and `vendor/` are mirrored exactly, so files the build no longer produces (e.g. old hashed chunks) are deleted on the server; nothing else is deleted. The theme is updated in place, not switched atomically.
 
-This theme isn't deployed yet; the workflow is a ready-to-configure placeholder.
+### Status
+
+Woodplane itself isn't deployed: `DEPLOY_METHOD` is still a placeholder, so every run skips the upload. Themes based on Woodplane follow the steps above.
 
 
 # Authors

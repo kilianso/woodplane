@@ -31,43 +31,62 @@ env:
   THEME_FILES: '*.php style.css screenshot.* LICENSE'
 
 jobs:
-  deploy:
+  # Skips the deploy job (instead of failing) until deployment is set up, see README → Deployment
+  check:
+    name: Check deployment setup
     if: github.ref == 'refs/heads/main'
     runs-on: ubuntu-24.04
-    timeout-minutes: 30
+    timeout-minutes: 5
+    outputs:
+      configured: ${{ steps.setup.outputs.configured }}
 
     steps:
-      - name: Check deployment configuration
+      - name: Check out host keys
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
+        with:
+          persist-credentials: false
+          sparse-checkout: .github
+
+      - name: Check settings, secrets and host keys
+        id: setup
         env:
           DEPLOY_PASSWORD: ${{ secrets.DEPLOY_PASSWORD || secrets.SFTP_PASSWORD }}
           DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
         run: |
+          if [[ -z "$DEPLOY_METHOD" || "$DEPLOY_METHOD" == __* ]]; then
+            echo "::notice::Deployment is not set up, skipping it. See README → Deployment."
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            exit 0
+          fi
           if [[ "$DEPLOY_METHOD" != ssh && "$DEPLOY_METHOD" != sftp ]]; then
-            echo "::error::Set DEPLOY_METHOD to 'ssh' or 'sftp' in this workflow."
+            echo "::error::DEPLOY_METHOD must be 'ssh' or 'sftp', not '$DEPLOY_METHOD'."
             exit 1
           fi
+          missing=()
           for setting in DEPLOY_HOST DEPLOY_PORT DEPLOY_USER DEPLOY_PATH; do
-            if [[ -z "${!setting}" || "${!setting}" == __* ]]; then
-              echo "::error::Set $setting in this workflow before deploying."
-              exit 1
-            fi
+            [[ -z "${!setting}" || "${!setting}" == __* ]] && missing+=("$setting in the workflow")
           done
-          if [[ -z "$DEPLOY_PASSWORD" && -z "$DEPLOY_SSH_KEY" ]]; then
-            echo "::error::Add the DEPLOY_PASSWORD or DEPLOY_SSH_KEY repository secret before deploying."
-            exit 1
+          [[ -z "$DEPLOY_PASSWORD" && -z "$DEPLOY_SSH_KEY" ]] && missing+=("the DEPLOY_PASSWORD or DEPLOY_SSH_KEY secret")
+          [[ -s .github/known_hosts ]] || missing+=("the server's host key in .github/known_hosts")
+          if (( ${#missing[@]} )); then
+            printf -v list '%s, ' "${missing[@]}"
+            echo "::warning::Deployment is not fully set up, skipping it. Missing: ${list%, }. See README → Deployment."
+            echo "configured=false" >> "$GITHUB_OUTPUT"
+            exit 0
           fi
+          echo "configured=true" >> "$GITHUB_OUTPUT"
 
+  deploy:
+    needs: check
+    if: needs.check.outputs.configured == 'true'
+    runs-on: ubuntu-24.04
+    timeout-minutes: 30
+
+    steps:
       - name: Check out theme
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7
         with:
           persist-credentials: false
-
-      - name: Check server host key
-        run: |
-          if [[ ! -s .github/known_hosts ]]; then
-            echo "::error::Add the server's verified host key to .github/known_hosts (see README → Deployment)."
-            exit 1
-          fi
 
       - name: Set up Node.js
         uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7
